@@ -1,0 +1,44 @@
+pipeline {
+  agent any
+	environment{
+	DOCKER_TAG = getDockerTag()
+	DATE = getDate()
+	}
+  stages {
+     stage('Clone Repository'){
+     steps{
+        script{
+            sh 'export GIT_SSL_NO_VERIFY=1'
+        }
+        git credentialsId: 'Subbu-GItLab', url: 'https://git.cloud.gov.in/OBPS/uatjk/edcr-client.git'
+       }
+  }
+     stage("Building Docker Image") {
+      steps {
+         script{
+            sh "docker build -t test:01 . --build-arg WORK_DIR=egov"
+                        }
+      }
+    }
+    stage("Push Image") {
+      steps{
+        echo "Pushing image ..."
+            withCredentials([string(credentialsId: 'subbuchub', variable: 'subbuchub')]) {
+                        sh "docker login -u annem.subba@walkingtree.tech -p ${subbuchub} chub.cloud.gov.in"
+                        sh "docker tag test:01 chub.cloud.gov.in/obps-mhu8c0-uatjk/edcr-client:$DATE"
+                        sh "docker image push chub.cloud.gov.in/obps-mhu8c0-uatjk/edcr-client:$DATE"
+			sh "docker rmi -f test:01"
+                        }
+                }
+    }
+}
+  }
+def getDockerTag(){
+      def tag = sh script: 'git rev-parse --short HEAD', returnStdout: true
+      return tag
+}
+def getDate(){
+    def date = sh script: "date +%d%b%y-%H-%M-%S", returnStdout: true
+    return date
+}
+
