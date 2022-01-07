@@ -65,7 +65,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 
 	private static final String RULE_DESCRIPTION = "Maximum building height allowed";
 	private static final String RULE_TBD = "Rule TBD";
-	private static final String BUILDING_HEIGHT = "Building Height";
+	private static final String BUILDING_HEIGHT = "Building Height ";
 
 	@Override
 	public Plan validate(Plan plan) {
