@@ -1,11 +1,13 @@
 package org.egov.client.edcr;
 import static org.egov.client.constants.DxfFileConstants_AR.*;
 import static org.egov.edcr.constants.DxfFileConstants.*;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.egov.common.entity.edcr.Block;
 import org.egov.common.entity.edcr.Floor;
@@ -23,9 +25,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class BuildingHeight_AR extends BuildingHeight {
 	private static final Logger LOG = Logger.getLogger(BuildingHeight_AR.class);
-	public static final BigDecimal HEIGHT_AR_04_5 = BigDecimal.valueOf(4.5);
-	public static final BigDecimal HEIGHT_AR_06 = BigDecimal.valueOf(6);
-	public static final BigDecimal HEIGHT_AR_09 = BigDecimal.valueOf(9);
+	public static final BigDecimal HEIGHT_AR_4_5 = BigDecimal.valueOf(4.5);
+	public static final BigDecimal HEIGHT_AR_6 = BigDecimal.valueOf(6);
+	public static final BigDecimal HEIGHT_AR_9 = BigDecimal.valueOf(9);
 	public static final BigDecimal HEIGHT_AR_12 = BigDecimal.valueOf(12);
 	public static final BigDecimal HEIGHT_AR_14 = BigDecimal.valueOf(14);
 	public static final BigDecimal HEIGHT_AR_15 = BigDecimal.valueOf(15);
@@ -49,12 +51,12 @@ public class BuildingHeight_AR extends BuildingHeight {
 	private static final BigDecimal PLOT_AREA_1000 = BigDecimal.valueOf(1000);
 	private static final BigDecimal PLOT_AREA_1500 = BigDecimal.valueOf(1500);
 	private static final BigDecimal PLOT_AREA_3000 = BigDecimal.valueOf(3000);
-	private static final BigDecimal PLOT_AREA_5000 = BigDecimal.valueOf(5000);
+	//private static final BigDecimal PLOT_AREA_5000 = BigDecimal.valueOf(5000);
 	private static final BigDecimal PLOT_AREA_2000 = BigDecimal.valueOf(2000);
 	private static final BigDecimal PLOT_AREA_4000 = BigDecimal.valueOf(4000);
 	private static final BigDecimal PLOT_AREA_12000 = BigDecimal.valueOf(12000);
-	private static final BigDecimal PLOT_AREA_28000 = BigDecimal.valueOf(28000);
-	private static final BigDecimal PLOT_AREA_6000 = BigDecimal.valueOf(6000);
+	//private static final BigDecimal PLOT_AREA_28000 = BigDecimal.valueOf(28000);
+	//private static final BigDecimal PLOT_AREA_6000 = BigDecimal.valueOf(6000);
 	private static final BigDecimal PLOT_AREA_20000 = BigDecimal.valueOf(20000);
 	private static final BigDecimal PLOT_AREA_10000 = BigDecimal.valueOf(10000);
 	private static final BigDecimal PLOT_AREA_1080 = BigDecimal.valueOf(1080);
@@ -66,6 +68,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 	private static final String RULE_DESCRIPTION = "Maximum building height allowed";
 	private static final String RULE_TBD = "Rule TBD";
 	private static final String BUILDING_HEIGHT = "Building Height";
+	private static final String METER_SQUARE = "m²";
 
 	@Override
 	public Plan validate(Plan plan) {
@@ -138,25 +141,23 @@ public class BuildingHeight_AR extends BuildingHeight {
 					buildingHeight = buildingHeight.add(parapetHeight);
 					buildingHeight = buildingHeight.add(stiltHeight);
 
-					if (occupancy.getTypeHelper().getType() != null
-							&& occupancy.getTypeHelper().getType().getCode().equals(A)) {
-						//Residential
+					if (occupancy.getTypeHelper().getType() != null && occupancy.getTypeHelper().getType().getCode().equals(A)) {
 						if (occupancy.getTypeHelper().getSubtype().getCode().equals(A_R)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(A_AF)) {
-							if (plotArea.compareTo(PLOT_AREA_48) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+							 if(plotArea.compareTo(PLOT_AREA_48) < 0) {
+								 if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_8_4) <= 0;
 									requiredBuildingHeight = "<= 8.4m";
 								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
 									requiredBuildingHeight = "<= 6m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_48) >= 0 && plotArea.compareTo(PLOT_AREA_60) < 0) {
+							 } else if (plotArea.compareTo(PLOT_AREA_48) >= 0 && plotArea.compareTo(PLOT_AREA_60) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_8_4) <= 0;
 									requiredBuildingHeight = "<= 8.4m";
 								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
 									requiredBuildingHeight = "<= 6m";
 								}
 							} else if (plotArea.compareTo(PLOT_AREA_60) >= 0 && plotArea.compareTo(PLOT_AREA_100) < 0) {
@@ -167,73 +168,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_100) >= 0
-									&& plotArea.compareTo(PLOT_AREA_250) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_14_4) <= 0;
-									requiredBuildingHeight = "<= 14.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
-									requiredBuildingHeight = "<= 12m";	
-								}
-							} else if (plotArea.compareTo(PLOT_AREA_250) >= 0
-									&& plotArea.compareTo(PLOT_AREA_500) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
-									requiredBuildingHeight = "<= 17.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-									requiredBuildingHeight = "<= 15m";
-								}
-							} else if (plotArea.compareTo(PLOT_AREA_500) >= 0
-									&& plotArea.compareTo(PLOT_AREA_1000) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
-									requiredBuildingHeight = "<= 17.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-									requiredBuildingHeight = "<= 15m";
-								}
-							} else if (plotArea.compareTo(PLOT_AREA_1000) >= 0
-									&& plotArea.compareTo(PLOT_AREA_1500) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
-									requiredBuildingHeight = "<= 17.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-									requiredBuildingHeight = "<= 15m";
-								}
-							} else if (plotArea.compareTo(PLOT_AREA_1500) >= 0
-									&& plotArea.compareTo(PLOT_AREA_3000) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
-									requiredBuildingHeight = "<= 17.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-									requiredBuildingHeight = "<= 15m";
-								}
-							}
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(A_RH)) {
-							if(plotWidth.compareTo(PLOT_WIDTH_8) >= 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_09) <= 0;
-									requiredBuildingHeight = "<= 9m";
-								} 	
-							}else {
-								requiredBuildingHeight = "Minimum required Plot Width is 8m";
-							}
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(A_FH)) {
-							if (plotArea.compareTo(PLOT_AREA_10000) >= 0 && plotArea.compareTo(PLOT_AREA_20000) < 0) {
-								isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
-								requiredBuildingHeight = "<= 6m";								
-							} else if (plotArea.compareTo(PLOT_AREA_20000) >= 0) {
-								isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
-								requiredBuildingHeight = "<= 6m";
-							}	
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(A_HE)
-								|| occupancy.getTypeHelper().getSubtype().getCode().equals(A_BH)) {
-							 if (plotArea.compareTo(PLOT_AREA_100) >= 0
-									&& plotArea.compareTo(PLOT_AREA_250) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_100) >= 0 && plotArea.compareTo(PLOT_AREA_250) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_14_4) <= 0;
 									requiredBuildingHeight = "<= 14.4m";
@@ -241,8 +176,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_250) >= 0
-									&& plotArea.compareTo(PLOT_AREA_500) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_250) >= 0 && plotArea.compareTo(PLOT_AREA_500) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<= 17.4m";
@@ -250,8 +184,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_500) >= 0
-									&& plotArea.compareTo(PLOT_AREA_1000) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_500) >= 0 && plotArea.compareTo(PLOT_AREA_1000) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<= 17.4m";
@@ -259,8 +192,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_1000) >= 0
-									&& plotArea.compareTo(PLOT_AREA_1500) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_1000) >= 0 && plotArea.compareTo(PLOT_AREA_1500) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<= 17.4m";
@@ -268,10 +200,52 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
+							} else if (plotArea.compareTo(PLOT_AREA_1500) >= 0 && plotArea.compareTo(PLOT_AREA_3000) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
+									requiredBuildingHeight = "<= 17.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
+									requiredBuildingHeight = "<= 15m";
+								}
+							} else {
+								//plan.addError("RESIDENTIAL_BUILDING_HEIGHT_MAX_PLOT_SIZE", "Building Height: Rule not defined for plot size greater than 3000"+METER_SQUARE);
+								requiredBuildingHeight="Rule not defined for plot size greater than 3000"+METER_SQUARE;
 							}
-						} else if(occupancy.getTypeHelper().getSubtype().getCode().equals(A_LH)
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(A_RH)) {
+							if (plotWidth.compareTo(PLOT_WIDTH_8) >= 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_9) <= 0;
+									requiredBuildingHeight = "<= 9m";
+								}
+							} else {
+								requiredBuildingHeight = "Minimum required Plot Width 8m";
+							}
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(A_FH)) {
+							//TODO: JBS: As per bye laws its 9m and there is no 10000 or 20000 plot area mentioned
+							if (plotArea.compareTo(PLOT_AREA_10000) >= 0 && plotArea.compareTo(PLOT_AREA_20000) < 0) {
+								isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
+								requiredBuildingHeight = "<= 6m";
+
+							} else if (plotArea.compareTo(PLOT_AREA_20000) >= 0) {
+								isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
+								requiredBuildingHeight = "<= 6m";
+							}
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(A_HE)
+								|| occupancy.getTypeHelper().getSubtype().getCode().equals(A_BH)
+								|| occupancy.getTypeHelper().getSubtype().getCode().equals(A_LH)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(A_GH)) {
-							 if (plotArea.compareTo(PLOT_AREA_1500) >= 0 && plotArea.compareTo(PLOT_AREA_3000) < 0) {
+							if(plotArea.compareTo(PLOT_AREA_100) <0) {
+								requiredBuildingHeight="Plot Size should be greater than 100"+METER_SQUARE;
+							} else if (plotArea.compareTo(PLOT_AREA_100) >= 0 && plotArea.compareTo(PLOT_AREA_250) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_14_4) <= 0;
+									requiredBuildingHeight = "<= 14.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
+									requiredBuildingHeight = "<= 12m";
+								}
+							} else if (plotArea.compareTo(PLOT_AREA_250) >= 0 && plotArea.compareTo(PLOT_AREA_500) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<= 17.4m";
@@ -279,25 +253,49 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
+							} else if (plotArea.compareTo(PLOT_AREA_500) >= 0 && plotArea.compareTo(PLOT_AREA_1000) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
+									requiredBuildingHeight = "<= 17.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
+									requiredBuildingHeight = "<= 15m";
+								}
+							} else if (plotArea.compareTo(PLOT_AREA_1000) >= 0 && plotArea.compareTo(PLOT_AREA_1500) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
+									requiredBuildingHeight = "<= 17.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
+									requiredBuildingHeight = "<= 15m";
+								}
+							} else if (plotArea.compareTo(PLOT_AREA_1500) >= 0 && plotArea.compareTo(PLOT_AREA_3000) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
+									requiredBuildingHeight = "<= 17.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
+									requiredBuildingHeight = "<= 15m";
+								}
+							} else {
+								requiredBuildingHeight="Rule not defined for plot size greater than 3000"+METER_SQUARE;
 							}
 						}
-					} else if (occupancy.getTypeHelper().getType() != null
-							&& occupancy.getTypeHelper().getType().getCode().equals(F)) {
-						//Commercial
+					} else if (occupancy.getTypeHelper().getType() != null && occupancy.getTypeHelper().getType().getCode().equals(F)) {
 						if (occupancy.getTypeHelper().getSubtype().getCode().equals(F_RT)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(F_SH)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(F_CB)) {
-							if (plan.getPlot().getArea().compareTo(PLOT_AREA_48) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_100) <= 0) {
+							if(plotArea.compareTo(PLOT_AREA_48) <0) {
+								requiredBuildingHeight="Plot Size should be greater than 48"+METER_SQUARE;
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_48) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_100) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_8_4) <= 0;
 									requiredBuildingHeight = "<= 8.4m";
 								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
 									requiredBuildingHeight = "<= 6m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_100) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_250) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_100) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_250) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_14_4) <= 0;
 									requiredBuildingHeight = "<= 14.4m";
@@ -305,8 +303,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_250) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_500) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_250) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_500) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<=  17.4m";
@@ -314,8 +311,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_500) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_1000) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_500) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_1000) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<=  17.4m";
@@ -323,8 +319,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_1000) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_1500) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_1000) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_1500) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<=  17.4m";
@@ -332,52 +327,47 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_1500) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_3000) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_1500) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_3000) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<=  17.4m";
 								} else {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
-								}
+								} 
 							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_3000) > 0) {
-								plan.addError("PLOT AREA", "Validation for plot area > 3000 not provided");
+								plan.addError("COMMERCIAL_BUILDING_HEIGHT_PLOT_SIZE", "Validation for plot area > 3000 "+METER_SQUARE+" not provided");
+								requiredBuildingHeight="Rule not defined for plot size greater than 3000"+METER_SQUARE;
 							}
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(F_SM)) {
-							isAccepted = buildingHeight.compareTo(HEIGHT_AR_18) <= 0;
-							requiredBuildingHeight = "<= 18m";
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(F_H)) { 
-							// Hotel
-							if (plotArea.compareTo(PLOT_AREA_250) > 0 && plotArea.compareTo(PLOT_AREA_500) <= 0) {
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(F_H)) {
+							if(plotArea.compareTo(PLOT_AREA_250) <0) {
+								requiredBuildingHeight="Plot Size should be greater than 250"+METER_SQUARE;
+							} else if (plotArea.compareTo(PLOT_AREA_250) > 0 && plotArea.compareTo(PLOT_AREA_500) <= 0) {
 								isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 								requiredBuildingHeight = "<= 15m";
-							} else if (plotArea.compareTo(PLOT_AREA_500) > 0
-									&& plotArea.compareTo(PLOT_AREA_1000) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_500) > 0 && plotArea.compareTo(PLOT_AREA_1000) < 0) {
 								isAccepted = true;
 								requiredBuildingHeight = "No Restriction";
-							} else if (plotArea.compareTo(PLOT_AREA_1000) > 0
-									&& plotArea.compareTo(PLOT_AREA_1500) <= 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_1000) > 0 && plotArea.compareTo(PLOT_AREA_1500) <= 0) {
 								isAccepted = true;
 								requiredBuildingHeight = "No Restriction";
 							} else if (plotArea.compareTo(PLOT_AREA_1500) > 0) {
 								isAccepted = true;
 								requiredBuildingHeight = "No Restriction";
 							}
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(F_M)) {
-							isAccepted = false;
-							requiredBuildingHeight = "Permissible value not provided";
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(F_R)) {
 							isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 							requiredBuildingHeight = "<= 12m";
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(F_M)) {
+							isAccepted = false;
+							requiredBuildingHeight = "Permissible value not provided";
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(F_PTP)) {
 							if (occupancy.getTypeHelper().getUsage().getCode().equals(F_PTP_FCSS)) {
 								if (plotArea.compareTo(PLOT_AREA_1080) > 0) {
 									isAccepted = false;
 									requiredBuildingHeight = "Permissible value not provided";
 								}
-							}
-							if (occupancy.getTypeHelper().getUsage().getCode().equals(F_PTP_FS)) {
+							} else if (occupancy.getTypeHelper().getUsage().getCode().equals(F_PTP_FS)) {
 								if (plotArea.compareTo(PLOT_AREA_510) > 0) {
 									isAccepted = false;
 									requiredBuildingHeight = "Permissible value not provided";
@@ -386,27 +376,24 @@ public class BuildingHeight_AR extends BuildingHeight {
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(F_WH)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(F_WST)) {
 							isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-							requiredBuildingHeight = "<= 15";
+							requiredBuildingHeight = "<= 15m";
 						}
-
-					}
-					//mixed land use to be determined 
-					else if (occupancy.getTypeHelper().getType() != null
+					} else if (occupancy.getTypeHelper().getType() != null 
 							&& (occupancy.getTypeHelper().getType().getCode().equals(ML_A)
-									|| occupancy.getTypeHelper().getType().getCode().equals(ML_F))) {
+							&& occupancy.getTypeHelper().getType().getCode().equals(ML_F))) { //mixed land use to be determined 
 						if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_RT)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_SH)) {
-							if (plan.getPlot().getArea().compareTo(PLOT_AREA_48) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_100) <= 0) {
+							if(plotArea.compareTo(PLOT_AREA_48) <0) {
+								requiredBuildingHeight="Plot Size should be greater than 48"+METER_SQUARE;
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_48) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_100) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_8_4) <= 0;
 									requiredBuildingHeight = "<= 8.4m";
 								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
 									requiredBuildingHeight = "<= 6m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_100) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_250) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_100) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_250) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_14_4) <= 0;
 									requiredBuildingHeight = "<= 14.4m";
@@ -414,8 +401,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_250) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_500) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_250) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_500) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<=  17.4m";
@@ -423,8 +409,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_500) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_1000) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_500) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_1000) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<=  17.4m";
@@ -432,8 +417,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_1000) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_1500) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_1000) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_1500) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<=  17.4m";
@@ -441,41 +425,38 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_1500) > 0
-									&& plan.getPlot().getArea().compareTo(PLOT_AREA_3000) <= 0) {
+							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_1500) > 0 && plan.getPlot().getArea().compareTo(PLOT_AREA_3000) <= 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<=  17.4m";
 								} else {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
-								}
+								} 
 							} else if (plan.getPlot().getArea().compareTo(PLOT_AREA_3000) > 0) {
-								plan.addError("PLOT AREA", "Validation for plot area > 3000 not provided");
+								plan.addError("COMMERCIAL_BUILDING_HEIGHT_PLOT_SIZE", "Validation for plot area > 3000 "+METER_SQUARE+" not provided");
+								requiredBuildingHeight="Rule not defined for plot size greater than 3000"+METER_SQUARE;
 							}
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_SM)) {
-							isAccepted = buildingHeight.compareTo(HEIGHT_AR_18) <= 0;
-							requiredBuildingHeight = "<= 18m";
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_H)) {
-							if (plotArea.compareTo(PLOT_AREA_250) > 0 && plotArea.compareTo(PLOT_AREA_500) <= 0) {
+							if(plotArea.compareTo(PLOT_AREA_250) <0) {
+								requiredBuildingHeight="Plot Size should be greater than 250"+METER_SQUARE;
+							} else if (plotArea.compareTo(PLOT_AREA_250) > 0 && plotArea.compareTo(PLOT_AREA_500) <= 0) {
 								isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 								requiredBuildingHeight = "<= 15m";
-							} else if (plotArea.compareTo(PLOT_AREA_500) > 0
-									&& plotArea.compareTo(PLOT_AREA_1000) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_500) > 0 && plotArea.compareTo(PLOT_AREA_1000) < 0) {
 								isAccepted = true;
 								requiredBuildingHeight = "No Restriction";
-							} else if (plotArea.compareTo(PLOT_AREA_1000) > 0
-									&& plotArea.compareTo(PLOT_AREA_1500) <= 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_1000) > 0 && plotArea.compareTo(PLOT_AREA_1500) <= 0) {
 								isAccepted = true;
 								requiredBuildingHeight = "No Restriction";
 							} else if (plotArea.compareTo(PLOT_AREA_1500) > 0) {
 								isAccepted = true;
 								requiredBuildingHeight = "No Restriction";
 							}
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_M)) {
-							isAccepted = false;
-							requiredBuildingHeight = "Permissible value not provided";
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_R)) {
+							isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
+							requiredBuildingHeight = "<= 12m";
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_M)) {
 							isAccepted = false;
 							requiredBuildingHeight = "Permissible value not provided";
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_PTP)) {
@@ -493,25 +474,23 @@ public class BuildingHeight_AR extends BuildingHeight {
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_WH)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(ML_F_WST)) {
 							isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-							requiredBuildingHeight = "<= 15";
-						}
-						// Mixed Land Use residential
-						if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_R)
+							requiredBuildingHeight = "<= 15m";
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_R)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_AF)) {
-							if (plotArea.compareTo(PLOT_AREA_48) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+							 if(plotArea.compareTo(PLOT_AREA_48) < 0) {
+								 if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_8_4) <= 0;
 									requiredBuildingHeight = "<= 8.4m";
 								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
 									requiredBuildingHeight = "<= 6m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_48) >= 0 && plotArea.compareTo(PLOT_AREA_60) < 0) {
+							 } else if (plotArea.compareTo(PLOT_AREA_48) >= 0 && plotArea.compareTo(PLOT_AREA_60) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_8_4) <= 0;
 									requiredBuildingHeight = "<= 8.4m";
 								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
 									requiredBuildingHeight = "<= 6m";
 								}
 							} else if (plotArea.compareTo(PLOT_AREA_60) >= 0 && plotArea.compareTo(PLOT_AREA_100) < 0) {
@@ -522,73 +501,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_100) >= 0
-									&& plotArea.compareTo(PLOT_AREA_250) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_14_4) <= 0;
-									requiredBuildingHeight = "<= 14.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
-									requiredBuildingHeight = "<= 12m";	
-								}
-							} else if (plotArea.compareTo(PLOT_AREA_250) >= 0
-									&& plotArea.compareTo(PLOT_AREA_500) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
-									requiredBuildingHeight = "<= 17.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-									requiredBuildingHeight = "<= 15m";
-								}
-							} else if (plotArea.compareTo(PLOT_AREA_500) >= 0
-									&& plotArea.compareTo(PLOT_AREA_1000) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
-									requiredBuildingHeight = "<= 17.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-									requiredBuildingHeight = "<= 15m";
-								}
-							} else if (plotArea.compareTo(PLOT_AREA_1000) >= 0
-									&& plotArea.compareTo(PLOT_AREA_1500) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
-									requiredBuildingHeight = "<= 17.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-									requiredBuildingHeight = "<= 15m";
-								}
-							} else if (plotArea.compareTo(PLOT_AREA_1500) >= 0
-									&& plotArea.compareTo(PLOT_AREA_3000) < 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
-									requiredBuildingHeight = "<= 17.4m";
-								} else {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
-									requiredBuildingHeight = "<= 15m";
-								}
-							}
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_RH)) {
-							if(plotWidth.compareTo(PLOT_WIDTH_8) >= 0) {
-								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_09) <= 0;
-									requiredBuildingHeight = "<= 9m";
-								} 	
-							}else {
-								requiredBuildingHeight = "Minimum required Plot Width is 8m";
-							}
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_FH)) {
-							if (plotArea.compareTo(PLOT_AREA_10000) >= 0 && plotArea.compareTo(PLOT_AREA_20000) < 0) {
-								isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
-								requiredBuildingHeight = "<= 6m";								
-							} else if (plotArea.compareTo(PLOT_AREA_20000) >= 0) {
-								isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
-								requiredBuildingHeight = "<= 6m";
-							}	
-						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_HE)
-								|| occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_BH)) {
-							 if (plotArea.compareTo(PLOT_AREA_100) >= 0
-									&& plotArea.compareTo(PLOT_AREA_250) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_100) >= 0 && plotArea.compareTo(PLOT_AREA_250) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_14_4) <= 0;
 									requiredBuildingHeight = "<= 14.4m";
@@ -596,8 +509,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_250) >= 0
-									&& plotArea.compareTo(PLOT_AREA_500) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_250) >= 0 && plotArea.compareTo(PLOT_AREA_500) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<= 17.4m";
@@ -605,8 +517,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_500) >= 0
-									&& plotArea.compareTo(PLOT_AREA_1000) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_500) >= 0 && plotArea.compareTo(PLOT_AREA_1000) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<= 17.4m";
@@ -614,8 +525,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
-							} else if (plotArea.compareTo(PLOT_AREA_1000) >= 0
-									&& plotArea.compareTo(PLOT_AREA_1500) < 0) {
+							} else if (plotArea.compareTo(PLOT_AREA_1000) >= 0 && plotArea.compareTo(PLOT_AREA_1500) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<= 17.4m";
@@ -623,10 +533,52 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
+							} else if (plotArea.compareTo(PLOT_AREA_1500) >= 0 && plotArea.compareTo(PLOT_AREA_3000) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
+									requiredBuildingHeight = "<= 17.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
+									requiredBuildingHeight = "<= 15m";
+								}
+							} else {
+								//plan.addError("RESIDENTIAL_BUILDING_HEIGHT_MAX_PLOT_SIZE", "Building Height: Rule not defined for plot size greater than 3000"+METER_SQUARE);
+								requiredBuildingHeight="Rule not defined for plot size greater than 3000"+METER_SQUARE;
 							}
-						} else if(occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_LH)
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_RH)) {
+							if (plotWidth.compareTo(PLOT_WIDTH_8) >= 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_9) <= 0;
+									requiredBuildingHeight = "<= 9m";
+								}
+							} else {
+								requiredBuildingHeight = "Minimum required Plot Width 8m";
+							}
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_FH)) {
+							//TODO: JBS: As per bye laws its 9m and there is no 10000 or 20000 plot area mentioned
+							if (plotArea.compareTo(PLOT_AREA_10000) >= 0 && plotArea.compareTo(PLOT_AREA_20000) < 0) {
+								isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
+								requiredBuildingHeight = "<= 6m";
+
+							} else if (plotArea.compareTo(PLOT_AREA_20000) >= 0) {
+								isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
+								requiredBuildingHeight = "<= 6m";
+							}
+						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_HE)
+								|| occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_BH)
+								|| occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_LH)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(ML_A_GH)) {
-							 if (plotArea.compareTo(PLOT_AREA_1500) >= 0 && plotArea.compareTo(PLOT_AREA_3000) < 0) {
+							if(plotArea.compareTo(PLOT_AREA_100) <0) {
+								requiredBuildingHeight="Plot Size should be greater than 100"+METER_SQUARE;
+							} else if (plotArea.compareTo(PLOT_AREA_100) >= 0 && plotArea.compareTo(PLOT_AREA_250) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_14_4) <= 0;
+									requiredBuildingHeight = "<= 14.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
+									requiredBuildingHeight = "<= 12m";
+								}
+							} else if (plotArea.compareTo(PLOT_AREA_250) >= 0 && plotArea.compareTo(PLOT_AREA_500) < 0) {
 								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
 									requiredBuildingHeight = "<= 17.4m";
@@ -634,29 +586,53 @@ public class BuildingHeight_AR extends BuildingHeight {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 									requiredBuildingHeight = "<= 15m";
 								}
+							} else if (plotArea.compareTo(PLOT_AREA_500) >= 0 && plotArea.compareTo(PLOT_AREA_1000) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
+									requiredBuildingHeight = "<= 17.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
+									requiredBuildingHeight = "<= 15m";
+								}
+							} else if (plotArea.compareTo(PLOT_AREA_1000) >= 0 && plotArea.compareTo(PLOT_AREA_1500) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
+									requiredBuildingHeight = "<= 17.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
+									requiredBuildingHeight = "<= 15m";
+								}
+							} else if (plotArea.compareTo(PLOT_AREA_1500) >= 0 && plotArea.compareTo(PLOT_AREA_3000) < 0) {
+								if (stiltHeight != BigDecimal.ZERO && stiltHeight != null) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_17_4) <= 0;
+									requiredBuildingHeight = "<= 17.4m";
+								} else {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
+									requiredBuildingHeight = "<= 15m";
+								}
+							} else {
+								requiredBuildingHeight="Rule not defined for plot size greater than 3000"+METER_SQUARE;
 							}
 						}
-					} //Industrial
-					else if (occupancy.getTypeHelper().getType() != null
-							&& occupancy.getTypeHelper().getType().getCode().equals(G)) {
+					} else if (occupancy.getTypeHelper().getType() != null && occupancy.getTypeHelper().getType().getCode().equals(G)) {
 						if (occupancy.getTypeHelper().getSubtype().getCode().equals(G_SC)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(G_FI)) {
-							if (plotArea.compareTo(PLOT_AREA_2000) >= 0) {
+							if (plotArea.compareTo(PLOT_AREA_2000) <0) {
+								plan.addError("G_FI_MINIMUM_PLOT_SIZE", "Building Height: Plot size should be more than 2000"+METER_SQUARE);
+								requiredBuildingHeight="Plot size should be more than 2000"+METER_SQUARE;
+							} else if (plotArea.compareTo(PLOT_AREA_2000) >= 0) {
 								isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 								requiredBuildingHeight = "<= 15m";
 							}
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(G_LSI)) {
-								// check for plains and hills
 							if ((plan.getPlanInfoProperties().get("TERRAIN")).equals("PLAINS")) {
-								if (plotArea.compareTo(PLOT_AREA_400)<= 0) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
-									requiredBuildingHeight = "<= 12";
-								} else if (plotArea.compareTo(PLOT_AREA_400) > 0
-										&& plotArea.compareTo(PLOT_AREA_4000) <= 0) {
+								if (plotArea.compareTo(PLOT_AREA_400) <= 0) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
-								} else if (plotArea.compareTo(PLOT_AREA_4000) > 0
-										&& plotArea.compareTo(PLOT_AREA_12000) <= 0) {
+								} else if (plotArea.compareTo(PLOT_AREA_400) > 0 && plotArea.compareTo(PLOT_AREA_4000) <= 0) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
+									requiredBuildingHeight = "<= 12m";
+								} else if (plotArea.compareTo(PLOT_AREA_4000) > 0 && plotArea.compareTo(PLOT_AREA_12000) <= 0) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
 								} else if (plotArea.compareTo(PLOT_AREA_12000) > 0) {
@@ -664,49 +640,39 @@ public class BuildingHeight_AR extends BuildingHeight {
 									requiredBuildingHeight = "<= 12m";
 								}
 							} else if ((plan.getPlanInfoProperties().get("TERRAIN")).equals("HILLS")) {
-								if (plotArea.compareTo(PLOT_AREA_400) <=0 ) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_09) <= 0;
-									requiredBuildingHeight = "<= 9m";
-								} else if (plotArea.compareTo(PLOT_AREA_400) > 0
-										&& plotArea.compareTo(PLOT_AREA_4000) <= 0) {
+								if (plotArea.compareTo(PLOT_AREA_400) <= 0 ) {
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_9) <= 0;
+									requiredBuildingHeight = "<= 9";
+								} else if (plotArea.compareTo(PLOT_AREA_400) > 0 && plotArea.compareTo(PLOT_AREA_4000) <= 0) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
-								} else if (plotArea.compareTo(PLOT_AREA_4000) > 0
-										&& plotArea.compareTo(PLOT_AREA_12000) <= 0) {
+								} else if (plotArea.compareTo(PLOT_AREA_4000) > 0 && plotArea.compareTo(PLOT_AREA_12000) <= 0) {
 									isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 									requiredBuildingHeight = "<= 12m";
 								} else if (plotArea.compareTo(PLOT_AREA_12000) > 0) {
-									isAccepted = buildingHeight.compareTo(HEIGHT_AR_09) <= 0;
+									isAccepted = buildingHeight.compareTo(HEIGHT_AR_9) <= 0;
 									requiredBuildingHeight = "<= 9m";
 								}
 							} else {
-								plan.addError("TERRAIN TYPE", "Terrain Type should be PLAINS/HILLS");
+								plan.addError("TERRAIN TYPE", "Building Height: Terrain Type should be PLAINS/HILLS");
 							}
 						} 
-					} else if (occupancy.getTypeHelper().getType() != null
-							&& occupancy.getTypeHelper().getType().getCode().equals(T)) {
+					} else if (occupancy.getTypeHelper().getType() != null && occupancy.getTypeHelper().getType().getCode().equals(T)) {
 						if(occupancy.getTypeHelper().getSubtype().getCode()!=null && occupancy.getTypeHelper().getSubtype().getCode().equals(T_R)) {
-							if (buildingHeight.compareTo(HEIGHT_AR_30) <= 0) {
-								isAccepted = false;
-								requiredBuildingHeight = "Cannot be validated" ;
-							}
-						}else if(occupancy.getTypeHelper().getSubtype().getCode()!=null && occupancy.getTypeHelper().getSubtype().getCode().equals(T_I)) {
+							isAccepted = false;
+							requiredBuildingHeight = "Cannot be validated";
+						} else if(occupancy.getTypeHelper().getSubtype().getCode()!=null && occupancy.getTypeHelper().getSubtype().getCode().equals(T_I)) {
 							if (buildingHeight.compareTo(HEIGHT_AR_12) <= 0) {
 								isAccepted = true;
-								requiredBuildingHeight = "<=12m" ;
+								requiredBuildingHeight = "<= 12m" ;
 							}
-						}	
-					} else if (occupancy.getTypeHelper().getType() != null
-							&& occupancy.getTypeHelper().getType().getCode().equals(P)) {
-						if (buildingHeight.compareTo(HEIGHT_AR_15) <= 0) {
-							isAccepted = true;
-							requiredBuildingHeight = "<= " + HEIGHT_AR_15;
 						}
-					} else if (occupancy.getTypeHelper().getType() != null
-							&& occupancy.getTypeHelper().getType().getCode().equals(C)) {
+					} else if (occupancy.getTypeHelper().getType() != null && occupancy.getTypeHelper().getType().getCode().equals(P)) {
+						isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
+						requiredBuildingHeight = "<= 15m";
+					} else if (occupancy.getTypeHelper().getType() != null	&& occupancy.getTypeHelper().getType().getCode().equals(C)) {
 						if (occupancy.getTypeHelper().getSubtype().getCode().equals(C_H)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(C_T)) {
-							isAccepted =false;
 							requiredBuildingHeight = "Cannot be validated";
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(C_NH)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(C_PC)
@@ -725,7 +691,7 @@ public class BuildingHeight_AR extends BuildingHeight {
 					} else if (occupancy.getTypeHelper().getType() != null
 							&& occupancy.getTypeHelper().getType().getCode().equals(B)) {
 						if (occupancy.getTypeHelper().getSubtype().getCode().equals(B_NS)) {
-							isAccepted = buildingHeight.compareTo(HEIGHT_AR_06) <= 0;
+							isAccepted = buildingHeight.compareTo(HEIGHT_AR_6) <= 0;
 							requiredBuildingHeight = "<= 6m";
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(B_PS)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(B_UPS)) {
@@ -740,33 +706,37 @@ public class BuildingHeight_AR extends BuildingHeight {
 							isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 							requiredBuildingHeight = "<= 15m";
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(B_SFMC)) {
-							isAccepted = buildingHeight.compareTo(HEIGHT_AR_09) < 0;
+							isAccepted = buildingHeight.compareTo(HEIGHT_AR_9) < 0;
 							requiredBuildingHeight = "<= 9m";
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(B_ERIC)) {
 							if (occupancy.getTypeHelper().getUsage().getCode().equals(B_ERIC_AC)) {
 								if (plotArea.compareTo(BigDecimal.valueOf(0.45).multiply(plotArea)) >= 0) {
-									isAccepted = true;
-									requiredBuildingHeight = "As per provision of Master Plan";
+									isAccepted =true;
+									requiredBuildingHeight = "<= As per provision of Master Plan";
 								}
 							} else if (occupancy.getTypeHelper().getUsage().getCode().equals(B_ERIC_AR)) {
 								if (plotArea.compareTo(BigDecimal.valueOf(0.25).multiply(plotArea)) >= 0) {
-									isAccepted = true;
-									requiredBuildingHeight = "As per provision of Master Plan";
+									isAccepted = false;
+									requiredBuildingHeight = "Cannot Validate";
 								}
-							} else if (occupancy.getTypeHelper().getUsage().getCode().equals(B_ERIC_SCC)
-									|| occupancy.getTypeHelper().getUsage().getCode().equals(B_ERIC_POS)) {
+							} else if (occupancy.getTypeHelper().getUsage().getCode().equals(B_ERIC_SCC)) {
 								if (plotArea.compareTo(BigDecimal.valueOf(0.15).multiply(plotArea)) >= 0) {
 									isAccepted = false;
-									requiredBuildingHeight = "Cannot validate";
+									requiredBuildingHeight = "Cannot Validate";
 								}
-							}
+							} else if (occupancy.getTypeHelper().getUsage().getCode().equals(B_ERIC_POS)) {
+								if (plotArea.compareTo(BigDecimal.valueOf(0.15).multiply(plotArea)) >= 0) {
+									isAccepted = false;
+									requiredBuildingHeight = "Cannot Validate";
+								}
+							} 
 						}
-						if (occupancy.getTypeHelper().getSubtype().getCode().equals(B_SP)) {
+						/* if (occupancy.getTypeHelper().getSubtype().getCode().equals(B_SP)) {
 							isAccepted = false;
-							requiredBuildingHeight = "Cannot validate";
-						}
-					} else if (occupancy.getTypeHelper().getType() != null
-							&& occupancy.getTypeHelper().getType().getCode().equals(U)) {
+							statusMessage = "Cannot Validate";
+
+						} */
+					} else if (occupancy.getTypeHelper().getType() != null && occupancy.getTypeHelper().getType().getCode().equals(U)) {
 						if (occupancy.getTypeHelper().getSubtype().getCode().equals(U_PP)) {
 							isAccepted = buildingHeight.compareTo(HEIGHT_AR_12) <= 0;
 							requiredBuildingHeight = "<= 12m";
@@ -784,7 +754,6 @@ public class BuildingHeight_AR extends BuildingHeight {
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(U_DMC)) {
 							isAccepted = buildingHeight.compareTo(HEIGHT_AR_15) <= 0;
 							requiredBuildingHeight = "<= 15m";
-
 						} else if (occupancy.getTypeHelper().getSubtype().getCode().equals(U_FP)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(U_FS)
 								|| occupancy.getTypeHelper().getSubtype().getCode().equals(U_FTI)
