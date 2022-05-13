@@ -143,17 +143,12 @@ public class Coverage_AR extends Coverage {
 try {
 
 	validate(pl);
-	String requiredPlotArea = "";
-	// String requiredCoverageArea = "";
+	String requiredPlotArea ="";
 	BigDecimal totalCoverage = BigDecimal.ZERO;
 	BigDecimal totalCoverageArea = BigDecimal.ZERO;
 	BigDecimal coveragePercentage = BigDecimal.ZERO;
 	BigDecimal PlotArea = pl.getPlot().getArea();
-	// String OccupancyType=pl.getPlanInformation().getLandUseZone().toUpperCase();
 	OccupancyTypeHelper mostRestrictiveOccupancyType = Util_AR.getMostRestrictive(pl);
-	LOG.info("\n mostRestrictiveOccupancyType : " + mostRestrictiveOccupancyType.getType().getName());
-	LOG.info("\n====================================\n");
-	LOG.info(" PLOT area ; " + PlotArea);
 
 	for (Block block : pl.getBlocks()) {
 		BigDecimal coverageAreaWithoutDeduction = BigDecimal.ZERO;
@@ -176,13 +171,10 @@ try {
 			block.getBuilding().setCoverage(coverage);
 
 			totalCoverageArea = totalCoverageArea.add(block.getBuilding().getCoverageArea());
-			// totalCoverage =
-			// totalCoverage.add(block.getBuilding().getCoverage());
 		}
 
 	}
 
-	System.out.println("total coverage area : " + totalCoverageArea);
 
 	if (pl.getPlot() != null && pl.getPlot().getArea().doubleValue() > 0)
 		totalCoverage = totalCoverageArea.multiply(BigDecimal.valueOf(100)).divide(
@@ -190,28 +182,386 @@ try {
 				DcrConstants.ROUNDMODE_MEASUREMENTS);
 	pl.setCoverage(totalCoverage);
 
-	System.out.println("totalCoverage : " + totalCoverage);
 
 	if (pl.getVirtualBuilding() != null) {
 		pl.getVirtualBuilding().setTotalCoverageArea(totalCoverageArea);
 		pl.getVirtualBuilding().setMostRestrictiveFarHelper(mostRestrictiveOccupancyType);
 	}
 
-	BigDecimal roadWidth = pl.getPlanInformation().getRoadWidth();
-	if (roadWidth != null && roadWidth.compareTo(ROAD_WIDTH_TWELVE_POINTTWO) >= 0
-			&& roadWidth.compareTo(ROAD_WIDTH_THIRTY_POINTFIVE) <= 0) {
-		processCoverage(pl, StringUtils.EMPTY, totalCoverage, Forty, null);
+	
+	if (mostRestrictiveOccupancyType != null) {
+		if ((mostRestrictiveOccupancyType.getType() != null
+				&& R.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode()))) {
+			processCoverageResidential(pl, mostRestrictiveOccupancyType,  PlotArea,totalCoverage,requiredPlotArea,coveragePercentage );
+		}
+		if (mostRestrictiveOccupancyType.getType() != null
+				&& C.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
+			processCoverageCommercial(pl, mostRestrictiveOccupancyType,  PlotArea, totalCoverage,requiredPlotArea,coveragePercentage);
+		}
+		if (mostRestrictiveOccupancyType.getType() != null
+				&& I.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
+
+			processCoverageIndustrial(pl, mostRestrictiveOccupancyType,  PlotArea, totalCoverage,requiredPlotArea,coveragePercentage);
+		}
+		if (mostRestrictiveOccupancyType.getType() != null
+				&& G.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
+
+			processCoverageGovernmentUse(pl, mostRestrictiveOccupancyType,  PlotArea, totalCoverage,requiredPlotArea,coveragePercentage);
+		}
+		if (mostRestrictiveOccupancyType.getType() != null
+				&& T.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
+
+			processCoverageTransportation(pl, mostRestrictiveOccupancyType,  PlotArea, totalCoverage,requiredPlotArea,coveragePercentage);
+		}
+		if (mostRestrictiveOccupancyType.getType() != null
+				&& P.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
+
+			processCoveragePublicSemiPublic(pl, mostRestrictiveOccupancyType,  PlotArea, totalCoverage,requiredPlotArea,coveragePercentage);
+		}
+
+	}
+	
+	
+
+} catch (Exception e) {
+	// TODO: handle exception
+}
+
+
+		return pl;
 	}
 
-	if (mostRestrictiveOccupancyType.getType().getCode().equals(A)) {
+	
 
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_R)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_AF)) {
+	private void processCoveragePublicSemiPublic(Plan pl, OccupancyTypeHelper mostRestrictiveOccupancyType,
+			BigDecimal PlotArea, BigDecimal totalCoverage, String requiredPlotArea, BigDecimal coveragePercentage) {
+		// Meeting Hall, Auditorium, Community Center
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P3a)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
 
-			if (PlotArea.compareTo(PLOT_AREA_48) <= 0) {
+				}
+				
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P3b)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
 
-			} else if (PlotArea.compareTo(PLOT_AREA_48) > 0 && PlotArea.compareTo(PLOT_AREA_60) <= 0) {
+				}
+				//Hostel
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P3c)) {
+					if(PlotArea.compareTo(PLOT_AREA_100)<0) {
+						pl.addError("PlotArea below 100 Hostel","Plot area below 100 sqmts not allowed for hostel");
+					}
+					else if (PlotArea.compareTo(PLOT_AREA_100) > 0 && PlotArea.compareTo(PLOT_AREA_250) <= 0) {
+						requiredPlotArea = "Above 100 to 250";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_65);
+					} else if (PlotArea.compareTo(PLOT_AREA_250) > 0 && PlotArea.compareTo(PLOT_AREA_500) <= 0) {
+						requiredPlotArea = "Above 250 to 500";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_60);
 
+					} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) <= 0) {
+						requiredPlotArea = "Above 500 to 1000";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+					} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_1500) <= 0) {
+						requiredPlotArea = "Above 1000 to 1500";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+					} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0 && PlotArea.compareTo(PLOT_AREA_3000) <= 0) {
+						requiredPlotArea = "Above 1500 to 3000";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_45);
+					}else if(PlotArea.compareTo(PLOT_AREA_3000)>0) {
+						pl.addError("PlotArea above 3000 Hostel","Plot area above 3000 sqmts not allowed for hostel");
+					}
+
+				}
+				
+
+
+				// Nursing Center
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P2b)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
+				}
+
+				// Veterinary
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P2c)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
+				}
+
+				// Medical College, Nursing and paramedic Institute
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P2d)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
+				}
+
+				// Nursery School
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1b)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+
+				}
+
+				// Primary School
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1c)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+				}
+
+				// High / Higher Secondary
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1d)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+				}
+
+				// College
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1e)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
+				}
+
+				// Special School
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1g)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+				}
+
+				// Edu & Research Centre
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1f)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
+				}
+
+				// Sports
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1a)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_25);
+				}
+				if(requiredPlotArea!="")
+					processCoverage(pl, mostRestrictiveOccupancyType.getSubtype().getName(), totalCoverage, coveragePercentage, requiredPlotArea);
+	}
+
+	private void processCoverageTransportation(Plan pl, OccupancyTypeHelper mostRestrictiveOccupancyType,
+			BigDecimal plotArea, BigDecimal totalCoverage, String requiredPlotArea, BigDecimal coveragePercentage) {
+		// Rail Terminal
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T1b)) {
+					if (pl.getPlanInfoProperties().get("TRANSPORTATION_AREA_TYPE").equalsIgnoreCase("OPERATION")) {
+
+						requiredPlotArea = "-";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_70);
+
+					} else if (pl.getPlanInfoProperties().get("TRANSPORTATION_AREA_TYPE").equalsIgnoreCase("BUILDING")) {
+
+						requiredPlotArea = "-";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
+
+					}
+
+				}
+				// ISBT Bus Terminal
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T1a)
+						|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(T1c)) {
+					if (pl.getPlanInfoProperties().get("TRANSPORTATION_AREA_TYPE").equalsIgnoreCase("OPERATION")) {
+						if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T1a)) {
+
+							requiredPlotArea = "-";
+							coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_25);
+
+						} else if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T1c)) {
+							requiredPlotArea = "-";
+							coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+
+						}
+
+					} else if (pl.getPlanInfoProperties().get("TRANSPORTATION_AREA_TYPE").equalsIgnoreCase("BUILDING")) {
+
+						requiredPlotArea = "-";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+
+					}
+
+				}
+				if(requiredPlotArea!="")
+					processCoverage(pl, mostRestrictiveOccupancyType.getSubtype().getName(), totalCoverage, coveragePercentage, requiredPlotArea);
+	}
+
+	private void processCoverageGovernmentUse(Plan pl, OccupancyTypeHelper mostRestrictiveOccupancyType, BigDecimal plotArea,
+			BigDecimal totalCoverage, String requiredPlotArea, BigDecimal coveragePercentage) {
+		// General/Govt./ Integrated Office Complex
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G2a)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+
+				}
+				// District Court
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G1a)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+
+				}
+				// Police Post
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G3a)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
+				}
+				// Police Station
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G3b)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+				}
+				// Other safety departments,Disaster manangement center, Fire Station etc.
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G3c)) {
+					requiredPlotArea = "-";
+					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+
+				}
+				if(requiredPlotArea!="")
+					processCoverage(pl, mostRestrictiveOccupancyType.getSubtype().getName(), totalCoverage, coveragePercentage, requiredPlotArea);
+	}
+
+	private void processCoverageIndustrial(Plan pl, OccupancyTypeHelper mostRestrictiveOccupancyType, BigDecimal PlotArea,
+			BigDecimal totalCoverage, String requiredPlotArea, BigDecimal coveragePercentage) {
+		// Flatted
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(I1a)) {
+					if(PlotArea.compareTo(PLOT_AREA_2000)<0) {
+						pl.addError("PlotArea below 2000 Flatted","Plot area below 2000 sqmts not allowed for Flatted");
+					}
+					else if (PlotArea.compareTo(PLOT_AREA_2000) >= 0) {
+						requiredPlotArea = "Above 2000";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_33_33);
+					}
+
+				}
+				
+		// Light and Service
+				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(I1b)) {
+					if (PlotArea.compareTo(PLOT_AREA_400) < 0) {
+						requiredPlotArea = "Below 400 ";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_60);
+					} else if (PlotArea.compareTo(PLOT_AREA_400) > 0 && PlotArea.compareTo(PLOT_AREA_4000) <= 0) {
+						requiredPlotArea = "Above 400 to 4000";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+					} else if (PlotArea.compareTo(PLOT_AREA_4000) > 0 && PlotArea.compareTo(PLOT_AREA_12000) <= 0) {
+						requiredPlotArea = "Above 4000 to 12000";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_45);
+					} else if (PlotArea.compareTo(PLOT_AREA_12000) > 0) {
+						requiredPlotArea = "Above 12000";
+						coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+					}
+				}
+				if(requiredPlotArea!="")
+					processCoverage(pl, mostRestrictiveOccupancyType.getSubtype().getName(), totalCoverage, coveragePercentage, requiredPlotArea);
+	}
+
+	private void processCoverageCommercial(Plan pl, OccupancyTypeHelper mostRestrictiveOccupancyType, BigDecimal PlotArea,
+			BigDecimal totalCoverage, String requiredPlotArea, BigDecimal coveragePercentage) {
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C1a)
+				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C1b)) {
+			if(PlotArea.compareTo(PLOT_AREA_48)<0) {
+				pl.addError("PlotArea below 48 commmercial","Plot area below 48 sqmts not allowed for Shops/Restaurant");
+			}
+			else if (PlotArea.compareTo(PLOT_AREA_48) > 0 && PlotArea.compareTo(PLOT_AREA_100) <= 0) {
+				requiredPlotArea = "Above 48 to 100";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_75);
+			} else if (PlotArea.compareTo(PLOT_AREA_100) > 0 && PlotArea.compareTo(PLOT_AREA_250) <= 0) {
+				requiredPlotArea = "Above 100 to 250";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_65);
+			} else if (PlotArea.compareTo(PLOT_AREA_250) > 0 && PlotArea.compareTo(PLOT_AREA_500) <= 0) {
+				requiredPlotArea = "Above 250 to 500";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_60);
+
+			} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) <= 0) {
+				requiredPlotArea = "Above 500 to 1000";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_1500) <= 0) {
+				requiredPlotArea = "Above 1000 to 1500";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+			} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0 && PlotArea.compareTo(PLOT_AREA_3000) <= 0) {
+				requiredPlotArea = "Above 1500 to 3000";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_45);
+			}else if(PlotArea.compareTo(PLOT_AREA_3000)>0) {
+				pl.addError("PlotArea Above 3000 Commercial","Plot area should not exceed above 3000 sqmts for Restaurant/Shops");
+			}
+
+		}
+		
+		//Shopping Mall
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C1c)) {
+			if(PlotArea.compareTo(PLOT_AREA_450)<0) {
+				pl.addError("PlotArea below 450 Shopping","Plot area below 450 sqmts not allowed for Shopping");
+			}
+			else if (PlotArea.compareTo(PLOT_AREA_450) >= 0 ) {
+				requiredPlotArea = "Above 450";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+			}
+		}
+		
+		// Hotel
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C2a)) {
+			if(PlotArea.compareTo(PLOT_AREA_250)<0){
+				pl.addError("PlotArea below 250 Hotel","Plot area below 250 sqmts not allowed for hotel");
+			}
+			else if (PlotArea.compareTo(PLOT_AREA_250) > 0 && PlotArea.compareTo(PLOT_AREA_500) <= 0) {
+				requiredPlotArea = "Above 250 to 500";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_60);
+			} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) <= 0) {
+				requiredPlotArea = "Above 500 to 1000";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_1500) <= 0) {
+				requiredPlotArea = "Above 1000 to 1500";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
+			} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0) {
+				requiredPlotArea = "Above 1500";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
+			}
+
+		}
+		// Motel
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C3a)) {
+			requiredPlotArea = "-";
+			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
+
+		}
+		// Resort
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C4a)) {
+				requiredPlotArea = "-";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
+		}
+		// Petrol Pump
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C5a)) {
+			if (PlotArea.compareTo(PLOT_AREA_1080) > 0) {
+				requiredPlotArea = "Above 1080";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_20);
+			} else if (PlotArea.compareTo(PLOT_AREA_510) > 0) {
+				requiredPlotArea = "Above 510";
+				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_10);
+
+			}else {
+				pl.addError("PlotArea below 510 Petrol","Plot area below 510 sqmts not allowed for Petrol Pump");
+			}
+
+		}
+		// Wholesale
+		if (mostRestrictiveOccupancyType.getUsage().getCode().equals(C6a)) {
+			requiredPlotArea = "-";
+			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_20);
+
+		}
+		if(requiredPlotArea!="")
+			processCoverage(pl, mostRestrictiveOccupancyType.getSubtype().getName(), totalCoverage, coveragePercentage, requiredPlotArea);
+	}
+
+	private void processCoverageResidential(Plan pl, OccupancyTypeHelper mostRestrictiveOccupancyType, BigDecimal PlotArea,
+			BigDecimal totalCoverage, String requiredPlotArea, BigDecimal coveragePercentage) {
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(R1a)){
+			requiredPlotArea = "-";
+			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_75);
+		}
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(R1b)
+				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(R1c)) {
+			if(PlotArea.compareTo(PLOT_AREA_48)<0) {
+				pl.addError("PlotArea below 48 Residential","Plot area below 48 sqmts not allowed for plotted residential housing");
+			}
+			else if (PlotArea.compareTo(PLOT_AREA_48) > 0 && PlotArea.compareTo(PLOT_AREA_60) <= 0) {
 				requiredPlotArea = "Above 48 to 60";
 				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_75);
 
@@ -234,353 +584,18 @@ try {
 			} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0 && PlotArea.compareTo(PLOT_AREA_3000) <= 0) {
 				requiredPlotArea = "Above 1500 to 3000";
 				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_45);
-			}
-
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_RH)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_75);
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_HE)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_BH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_LH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_GH)) {
-
-			if (PlotArea.compareTo(PLOT_AREA_100) > 0 && PlotArea.compareTo(PLOT_AREA_250) <= 0) {
-				requiredPlotArea = "Above 100 to 250";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_65);
-			} else if (PlotArea.compareTo(PLOT_AREA_250) > 0 && PlotArea.compareTo(PLOT_AREA_500) <= 0) {
-				requiredPlotArea = "Above 250 to 500";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_60);
-
-			} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) <= 0) {
-				requiredPlotArea = "Above 500 to 1000";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_1500) <= 0) {
-				requiredPlotArea = "Above 1000 to 1500";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-			} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0 && PlotArea.compareTo(PLOT_AREA_3000) <= 0) {
-				requiredPlotArea = "Above 1500 to 3000";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_45);
-			}
-
-		}
-
-	} else if (mostRestrictiveOccupancyType.getType().getCode().equals(F)) {
-
-		// Restaurants/shops
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_RT)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_SH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_CB)) {
-
-			if (PlotArea.compareTo(PLOT_AREA_48) > 0 && PlotArea.compareTo(PLOT_AREA_100) <= 0) {
-				requiredPlotArea = "Above 48 to 100";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_75);
-			} else if (PlotArea.compareTo(PLOT_AREA_100) > 0 && PlotArea.compareTo(PLOT_AREA_250) <= 0) {
-				requiredPlotArea = "Above 100 to 250";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_65);
-			} else if (PlotArea.compareTo(PLOT_AREA_250) > 0 && PlotArea.compareTo(PLOT_AREA_500) <= 0) {
-				requiredPlotArea = "Above 250 to 500";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_60);
-
-			} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) <= 0) {
-				requiredPlotArea = "Above 500 to 1000";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_1500) <= 0) {
-				requiredPlotArea = "Above 1000 to 1500";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-			} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0 && PlotArea.compareTo(PLOT_AREA_3000) <= 0) {
-				requiredPlotArea = "Above 1500 to 3000";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_45);
-			}
-
-		}
-		// shopping mall
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_SM)) {
-			if (PlotArea.compareTo(PLOT_AREA_450) > 0) {
-				requiredPlotArea = "Above 450";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-			}
-
-		}
-		// Hotel
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_H)) {
-
-			if (PlotArea.compareTo(PLOT_AREA_250) > 0 && PlotArea.compareTo(PLOT_AREA_500) <= 0) {
-				requiredPlotArea = "Above 250 to 500";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_60);
-			} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) <= 0) {
-				requiredPlotArea = "Above 500 to 1000";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_1500) <= 0) {
-				requiredPlotArea = "Above 1000 to 1500";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-			} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0) {
-				requiredPlotArea = "Above 1500";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-			}
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_M)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_R)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_PTP)) {
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(F_PTP_FCSS)) {
-				if (PlotArea.compareTo(PLOT_AREA_1080) > 0) {
-					requiredPlotArea = "Above 1080";
-					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_20);
-				}
-			}
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(F_PTP_FS)) {
-				if (PlotArea.compareTo(PLOT_AREA_510) > 0) {
-					requiredPlotArea = "Above 510";
-					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_10);
-				}
-			}
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_WH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_WST)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_20);
-		}
-
-	} else if (mostRestrictiveOccupancyType.getType().getCode().equals(ML)) {
-
-	} else if (mostRestrictiveOccupancyType.getType().getCode().equals(G)) {
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G_SC)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(G_FI)) {
-			if (PlotArea.compareTo(PLOT_AREA_2000) >= 0) {
-				requiredPlotArea = "Above 2000";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_33_33);
-			}
-
-		}
-
-		// check for light and service industry
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G_LSI)) {
-			if (PlotArea.compareTo(PLOT_AREA_400) < 0) {
-				requiredPlotArea = "Below 400 ";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_60);
-			} else if (PlotArea.compareTo(PLOT_AREA_400) > 0 && PlotArea.compareTo(PLOT_AREA_4000) <= 0) {
-				requiredPlotArea = "Above 400 to 4000";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-			} else if (PlotArea.compareTo(PLOT_AREA_4000) > 0 && PlotArea.compareTo(PLOT_AREA_12000) <= 0) {
-				requiredPlotArea = "Above 4000 to 12000";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_45);
-			} else if (PlotArea.compareTo(PLOT_AREA_12000) > 0) {
-				requiredPlotArea = "Above 12000";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-			}
-
-		}
-	} else if (mostRestrictiveOccupancyType.getType().getCode().equals(T)) {
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T_R)) {
-			if (pl.getPlanInfoProperties().get("TRANSPORTATION_AREA_TYPE").equalsIgnoreCase("OPERATION")) {
-
-				requiredPlotArea = "-";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_70);
-
-			} else if (pl.getPlanInfoProperties().get("TRANSPORTATION_AREA_TYPE").equalsIgnoreCase("BUILDING")) {
-
-				requiredPlotArea = "-";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
-
+			}else if (PlotArea.compareTo(PLOT_AREA_3000) > 0) {
+				pl.addError("PlotArea Above 3000 Residential","Plot area should not exceed above 3000 sqmts for plotted residential housing");
 			}
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T_I)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(T_B)) {
-
-			if (pl.getPlanInfoProperties().get("TRANSPORTATION_AREA_TYPE").equalsIgnoreCase("OPERATION")) {
-				if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T_I)) {
-
-					requiredPlotArea = "-";
-					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_25);
-
-				} else if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T_B)) {
-					requiredPlotArea = "-";
-					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-
-				}
-
-			} else if (pl.getPlanInfoProperties().get("TRANSPORTATION_AREA_TYPE").equalsIgnoreCase("BUILDING")) {
-
-				requiredPlotArea = "-";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-
-			}
-
-		}
-
-	} else if (mostRestrictiveOccupancyType.getType().getCode().equals(P)) {
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_O)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_I)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_D)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_H)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_A)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_B)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_C)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
-		}
-
-	} else if (mostRestrictiveOccupancyType.getType().getCode().equals(C)) {
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_NH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_PC)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_D)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_DC)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_VH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_VD)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_NAPI)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
-
-		}
-	} else if (mostRestrictiveOccupancyType.getType().getCode().equals(B)) {
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_NS)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_PS)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_UPS)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_HSS)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_SS)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_C)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_U)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_35);
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_SFMC)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_50);
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_ERIC)) {
-
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(B_ERIC_AC)) {
-				if (PlotArea.compareTo(BigDecimal.valueOf(0.45).multiply(PlotArea)) >= 0) {
-					requiredPlotArea = "Above 45% of Total Area";
-					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
-				}
-			} else if (mostRestrictiveOccupancyType.getUsage().getCode().equals(B_ERIC_AR)) {
-
-			} else if (mostRestrictiveOccupancyType.getUsage().getCode().equals(B_ERIC_SCC)) {
-				if (PlotArea.compareTo(BigDecimal.valueOf(0.15).multiply(PlotArea)) >= 0) {
-					requiredPlotArea = "Above 15% of Total Area";
-					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_10);
-				}
-			} else if (mostRestrictiveOccupancyType.getUsage().getCode().equals(B_ERIC_POS)) {
-				if (PlotArea.compareTo(BigDecimal.valueOf(0.15).multiply(PlotArea)) >= 0) {
-					requiredPlotArea = "Above 15% of Total Area";
-					coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_10);
-				}
-			}
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_SP)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_25);
-		}
-
-	} else if (mostRestrictiveOccupancyType.getType().getCode().equals(U)) {
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_PP)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_PS)) {
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(U_PS_DOB)) {
-				requiredPlotArea = "-";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-			}
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(U_PS_DJ)) {
-				requiredPlotArea = "-";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
-			}
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(U_PS_PTI)) {
-				requiredPlotArea = "-";
-				coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_30);
-			}
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_DMC)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_FP)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_FS)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_FTI)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_FTC)) {
-			requiredPlotArea = "-";
-			coveragePercentage = (pl.getPlot().getArea()).multiply(COVERAGE_AREA_40);
-		}
+		if(requiredPlotArea!="")
+			processCoverage(pl, mostRestrictiveOccupancyType.getSubtype().getName(), totalCoverage, coveragePercentage, requiredPlotArea);
+		
+		
 	}
 
-//	if (requiredPlotArea != "" && requiredPlotArea != null) {
-		processCoverage(pl, StringUtils.EMPTY, totalCoverageArea, coveragePercentage, requiredPlotArea);
-//	}
-} catch (Exception e) {
-	// TODO: handle exception
-}
-		/*
-		 * BigDecimal ZONE_DC = BigDecimal.ZERO; String STABILITY_REPORT =
-		 * StringUtils.EMPTY;
-		 * 
-		 * try { ZONE_DC = new BigDecimal(pl.getPlanInfoProperties().entrySet().stream()
-		 * .filter(e ->
-		 * e.getKey().equals("STABILITY_ZONE")).map(Map.Entry::getValue).findFirst().
-		 * orElse("0")); STABILITY_REPORT = (String)
-		 * pl.getPlanInfoProperties().entrySet().stream() .filter(e ->
-		 * e.getKey().equals("STABILITY_REPORT")).map(Map.Entry::getValue).findFirst().
-		 * orElse("0"); }catch(Exception e){ ZONE_DC = BigDecimal.ZERO; }
-		 */
-
-
-		return pl;
-	}
-
-	private void processCoverage(Plan pl, String occupancy, BigDecimal coverage, BigDecimal upperLimit,
-			String expectedResult) {
+	private void processCoverage(Plan pl, String occupancy, BigDecimal coverage, BigDecimal expectedResult,
+			String requiredPlotArea) {
 		ScrutinyDetail scrutinyDetail = new ScrutinyDetail();
 		scrutinyDetail.setKey("Common_Coverage");
 		scrutinyDetail.setHeading("Coverage in Percentage");
@@ -592,19 +607,15 @@ try {
 
 		String desc = "Coverage";
 		String actualResult = getLocaleMessage(RULE_ACTUAL_KEY, coverage.toString());
-		if (expectedResult.equalsIgnoreCase("")) {
-			expectedResult = "Not Validated";
-		} else {
-			expectedResult = "Should be <= " + upperLimit;
-		}
+		
 
 		Map<String, String> details = new HashMap<>();
 		details.put(RULE_NO, RULE_38);
 		details.put(DESCRIPTION, desc);
-		details.put(PERMISSIBLE, expectedResult);
+		details.put(PERMISSIBLE,"<= "+ expectedResult.toString());
 		details.put(PROVIDED, actualResult);
 
-		if (coverage.doubleValue() <= upperLimit.doubleValue()) {
+		if (coverage.doubleValue() <= expectedResult.doubleValue()) {
 			details.put(STATUS, Result.Accepted.getResultVal());
 		} else {
 			details.put(STATUS, Result.Not_Accepted.getResultVal());

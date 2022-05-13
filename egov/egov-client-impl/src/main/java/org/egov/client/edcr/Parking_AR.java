@@ -142,622 +142,577 @@ public class Parking_AR extends Parking {
 	}
 
 	private void validateDimensions(Plan pl) {
-		ParkingDetails parkDtls = pl.getParkingDetails();
-		if (!parkDtls.getCars().isEmpty()) {
-			int count = 0;
-			for (Measurement m : parkDtls.getCars())
-				if (m.getInvalidReason() != null && m.getInvalidReason().length() > 0)
-					count++;
-			if (count > 0)
-				pl.addError(PARKING_SLOT, PARKING_SLOT + count + SLOT_HAVING_GT_4_PTS);
-		}
-
-		if (!parkDtls.getOpenCars().isEmpty()) {
-			int count = 0;
-			for (Measurement m : parkDtls.getOpenCars())
-				if (m.getInvalidReason() != null && m.getInvalidReason().length() > 0)
-					count++;
-			if (count > 0)
-				pl.addError(OPEN_PARKING_DIM_DESC, OPEN_PARKING_DIM_DESC + count + SLOT_HAVING_GT_4_PTS);
-		}
-
-		if (!parkDtls.getCoverCars().isEmpty()) {
-			int count = 0;
-			for (Measurement m : parkDtls.getCoverCars())
-				if (m.getInvalidReason() != null && m.getInvalidReason().length() > 0)
-					count++;
-			if (count > 0)
-				pl.addError(COVER_PARKING_DIM_DESC, COVER_PARKING_DIM_DESC + count + SLOT_HAVING_GT_4_PTS);
-		}
-
-		if (!parkDtls.getCoverCars().isEmpty()) {
-			int count = 0;
-			for (Measurement m : parkDtls.getBasementCars())
-				if (m.getInvalidReason() != null && m.getInvalidReason().length() > 0)
-					count++;
-			if (count > 0)
-				pl.addError(BSMNT_PARKING_DIM_DESC, BSMNT_PARKING_DIM_DESC + count + SLOT_HAVING_GT_4_PTS);
-		}
-
-//		if (!parkDtls.getSpecial().isEmpty()) {
+//		ParkingDetails parkDtls = pl.getParkingDetails();
+//		if (!parkDtls.getCars().isEmpty()) {
 //			int count = 0;
-//			for (Measurement m : parkDtls.getDisabledPersons())
+//			for (Measurement m : parkDtls.getCars())
 //				if (m.getInvalidReason() != null && m.getInvalidReason().length() > 0)
 //					count++;
 //			if (count > 0)
-//				pl.addError(SPECIAL_PARKING_DIM_DESC, SPECIAL_PARKING_DIM_DESC + count
-//						+ " number of DA Parking slot polygon not having only 4 points.");
+//				pl.addError(PARKING_SLOT, PARKING_SLOT + count + SLOT_HAVING_GT_4_PTS);
 //		}
-
-//		if (!parkDtls.getLoadUnload().isEmpty()) {
+//
+//		if (!parkDtls.getOpenCars().isEmpty()) {
 //			int count = 0;
-//			for (Measurement m : parkDtls.getLoadUnload())
-//				if (m.getArea().compareTo(BigDecimal.valueOf(30)) < 0)
-//					count++;
-//			if (count > 0)
-//				pl.addError("load unload", count + " loading unloading parking spaces doesnt contain minimum of 30m2");
-//		}
-
-//		if (!parkDtls.getMechParking().isEmpty()) {
-//			int count = 0;
-//			for (Measurement m : parkDtls.getMechParking())
+//			for (Measurement m : parkDtls.getOpenCars())
 //				if (m.getInvalidReason() != null && m.getInvalidReason().length() > 0)
 //					count++;
 //			if (count > 0)
-//				pl.addError(MECHANICAL_PARKING,
-//						count + " number of Mechanical parking slot polygon not having only 4 points.");
+//				pl.addError(OPEN_PARKING_DIM_DESC, OPEN_PARKING_DIM_DESC + count + SLOT_HAVING_GT_4_PTS);
 //		}
-
-//		if (!parkDtls.getTwoWheelers().isEmpty()) {
+//
+//		if (!parkDtls.getCoverCars().isEmpty()) {
 //			int count = 0;
-//			for (Measurement m : parkDtls.getTwoWheelers())
+//			for (Measurement m : parkDtls.getCoverCars())
 //				if (m.getInvalidReason() != null && m.getInvalidReason().length() > 0)
 //					count++;
 //			if (count > 0)
-//				pl.addError(TWO_WHEELER_DIM_DESC, TWO_WHEELER_DIM_DESC + count
-//						+ " number of two wheeler Parking slot polygon not having only 4 points.");
+//				pl.addError(COVER_PARKING_DIM_DESC, COVER_PARKING_DIM_DESC + count + SLOT_HAVING_GT_4_PTS);
 //		}
+//
+//		if (!parkDtls.getCoverCars().isEmpty()) {
+//			int count = 0;
+//			for (Measurement m : parkDtls.getBasementCars())
+//				if (m.getInvalidReason() != null && m.getInvalidReason().length() > 0)
+//					count++;
+//			if (count > 0)
+//				pl.addError(BSMNT_PARKING_DIM_DESC, BSMNT_PARKING_DIM_DESC + count + SLOT_HAVING_GT_4_PTS);
+//		}
+//
+
 	}
 
 	public void processParking(Plan pl) {
 
-		LOGGER.info("Parking Arunachal Pradesh ");
-		ParkingHelper helper = new ParkingHelper();
-		// checkDimensionForCarParking(pl, helper);
-
-		OccupancyTypeHelper mostRestrictiveOccupancy = pl.getVirtualBuilding() != null
-				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
-				: null;
-		BigDecimal totalBuiltupArea = pl.getOccupancies().stream().map(Occupancy::getBuiltUpArea)
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
-
-		BigDecimal totalFloorArea = pl.getOccupancies().stream().map(Occupancy::getFloorArea).reduce(BigDecimal.ZERO,
-				BigDecimal::add);
-
-		BigDecimal totalFloorArea2 = pl.getVirtualBuilding().getTotalFloorArea();
-
-		BigDecimal plotArea = pl.getPlot().getArea();
-
-//		LOGGER.info(" Built up area : " + totalBuiltupArea);
-//		LOGGER.info("Total floor area : " + totalFloorArea);
-//		LOGGER.info("Total floor area from virtual building : " + totalFloorArea2);
-//		LOGGER.info(" Plot Area :: " + plotArea);
-//		LOGGER.info(" MostRestrictiveOccupancy : " + mostRestrictiveOccupancy);
-//		LOGGER.info(" MostRestrictiveOccupancy Type : " + mostRestrictiveOccupancy.getType().getCode());
-//		LOGGER.info(" MostRestrictiveOccupancy subtype : " + mostRestrictiveOccupancy.getSubtype().getCode());
-//		LOGGER.info(" MostRestrictiveOccupancy usage : " + mostRestrictiveOccupancy.getUsage().getCode());
-
-		BigDecimal coverParkingArea = BigDecimal.ZERO;
-//		BigDecimal stiltParkingArea = BigDecimal.ZERO;
-		BigDecimal basementParkingArea = BigDecimal.ZERO;
-		for (Block block : pl.getBlocks()) {
-			for (Floor floor : block.getBuilding().getFloors()) {
-				coverParkingArea = coverParkingArea.add(floor.getParking().getCoverCars().stream()
-						.map(Measurement::getArea).reduce(BigDecimal.ZERO, BigDecimal::add));
-
-//				stiltParkingArea = stiltParkingArea.add(floor.getParking().getStilts().stream()
+//		LOGGER.info("Parking Arunachal Pradesh ");
+//		ParkingHelper helper = new ParkingHelper();
+//		// checkDimensionForCarParking(pl, helper);
+//
+//		OccupancyTypeHelper mostRestrictiveOccupancy = pl.getVirtualBuilding() != null
+//				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
+//				: null;
+//		BigDecimal totalBuiltupArea = pl.getOccupancies().stream().map(Occupancy::getBuiltUpArea)
+//				.reduce(BigDecimal.ZERO, BigDecimal::add);
+//
+//		BigDecimal totalFloorArea = pl.getOccupancies().stream().map(Occupancy::getFloorArea).reduce(BigDecimal.ZERO,
+//				BigDecimal::add);
+//
+//		BigDecimal totalFloorArea2 = pl.getVirtualBuilding().getTotalFloorArea();
+//
+//		BigDecimal plotArea = pl.getPlot().getArea();
+//
+//
+//		BigDecimal coverParkingArea = BigDecimal.ZERO;
+////		BigDecimal stiltParkingArea = BigDecimal.ZERO;
+//		BigDecimal basementParkingArea = BigDecimal.ZERO;
+//		for (Block block : pl.getBlocks()) {
+//			for (Floor floor : block.getBuilding().getFloors()) {
+//				coverParkingArea = coverParkingArea.add(floor.getParking().getCoverCars().stream()
 //						.map(Measurement::getArea).reduce(BigDecimal.ZERO, BigDecimal::add));
-
-				basementParkingArea = basementParkingArea.add(floor.getParking().getBasementCars().stream()
-						.map(Measurement::getArea).reduce(BigDecimal.ZERO, BigDecimal::add));
-			}
-		}
-		BigDecimal openParkingArea = pl.getParkingDetails().getOpenCars().stream().map(Measurement::getArea)
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
-
-		BigDecimal totalProvidedCarParkArea = openParkingArea.add(coverParkingArea).add(basementParkingArea);
-		helper.totalRequiredCarParking += openParkingArea.doubleValue() / OPEN_ECS_18;
-		helper.totalRequiredCarParking += coverParkingArea.doubleValue() / COVER_ECS;
-		helper.totalRequiredCarParking += basementParkingArea.doubleValue() / BSMNT_ECS;
-//		helper.totalRequiredCarParking += stiltParkingArea.doubleValue() / COVER_ECS;
-
-		LOGGER.info(" totalProvidedCarParkArea : " + totalProvidedCarParkArea);
-
-		Double requiredCarParkArea = 0d;
-		Double requiredVisitorParkArea = 0d;
-
-		BigDecimal providedVisitorParkArea = BigDecimal.ZERO;
-
-//        validateSpecialParking(pl, helper, totalBuiltupArea);
-
-		if (mostRestrictiveOccupancy != null) {
-			if (mostRestrictiveOccupancy != null && totalBuiltupArea != null
-					&& A.equals(mostRestrictiveOccupancy.getType().getCode())) {
-
-				if ((A_R.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| A_AF.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| A_RH.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
-
-					if (plotArea.compareTo(BigDecimal.valueOf(100)) < 0) {
-
-					} else if (plotArea.compareTo(BigDecimal.valueOf(100)) > 0
-							&& plotArea.compareTo(BigDecimal.valueOf(300)) <= 0) {
-
-						if (coverParkingArea.doubleValue() > 0)
-							requiredCarParkArea += COVER_ECS * ECS_ONE_POINT_FIVE;
-						if (basementParkingArea.doubleValue() > 0)
-							requiredCarParkArea += BSMNT_ECS * ECS_ONE_POINT_FIVE;
-						if (openParkingArea.doubleValue() > 0)
-							requiredCarParkArea += OPEN_ECS_18 * ECS_ONE_POINT_FIVE;
-					} else if (plotArea.compareTo(BigDecimal.valueOf(300)) > 0
-							&& plotArea.compareTo(BigDecimal.valueOf(500)) <= 0) {
-
-						if (coverParkingArea.doubleValue() > 0)
-							requiredCarParkArea += COVER_ECS * ECS_TWO_POINT_FIVE;
-						if (basementParkingArea.doubleValue() > 0)
-							requiredCarParkArea += BSMNT_ECS * ECS_TWO_POINT_FIVE;
-						if (openParkingArea.doubleValue() > 0)
-							requiredCarParkArea += OPEN_ECS_18 * ECS_TWO_POINT_FIVE;
-					} else if (plotArea.compareTo(BigDecimal.valueOf(500)) > 0) {
-						BigDecimal builtupArea = totalBuiltupArea;
-//								.subtract(totalBuiltupArea.multiply(BigDecimal.valueOf(0.15)));
-						double requiredEcs = builtupArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_ONE_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-
-						if (coverParkingArea.doubleValue() > 0)
-							requiredCarParkArea += COVER_ECS * requiredEcs;
-						if (basementParkingArea.doubleValue() > 0)
-							requiredCarParkArea += BSMNT_ECS * requiredEcs;
-						if (openParkingArea.doubleValue() > 0)
-							requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-					}
-				} else if (A_HE.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| A_BH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| A_LH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| A_GH.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-
-					if (plotArea.compareTo(BigDecimal.valueOf(100)) < 0) {
-
-					} else if (plotArea.compareTo(BigDecimal.valueOf(100)) > 0) {
-
-						if (coverParkingArea.doubleValue() > 0)
-							requiredCarParkArea += COVER_ECS * ECS_ONE_POINT_FIVE;
-						if (basementParkingArea.doubleValue() > 0)
-							requiredCarParkArea += BSMNT_ECS * ECS_ONE_POINT_FIVE;
-						if (openParkingArea.doubleValue() > 0)
-							requiredCarParkArea += OPEN_ECS_18 * ECS_ONE_POINT_FIVE;
-					}
-
-				}
-
-			} else if (mostRestrictiveOccupancy != null && F.equals(mostRestrictiveOccupancy.getType().getCode())) {
-				BigDecimal floorArea = totalFloorArea;
-				double requiredEcs = 0.0;
-
-				double requiredEcs2 = 0.0;
-
-				if (mostRestrictiveOccupancy != null && (F_RT.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| F_SH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| F_CB.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_ZERO_POINT_FIVE))
-							.setScale(0, RoundingMode.UP).doubleValue();
-					requiredEcs2 = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_ONE_POINT_FIVE))
-							.setScale(0, RoundingMode.UP).doubleValue();
-
-				} else if (F_SM.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_THREE_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-
-				} else if (F_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-					requiredEcs2 = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_THREE_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (F_WST.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| F_WH.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				}
-				LOGGER.info("requiredEcs " + requiredEcs);
-				LOGGER.info("requiredEcs2 " + requiredEcs2);
-
-				if (coverParkingArea.doubleValue() > 0)
-					requiredCarParkArea += COVER_ECS * requiredEcs;
-				if (basementParkingArea.doubleValue() > 0)
-					requiredCarParkArea += BSMNT_ECS * requiredEcs;
-				if (openParkingArea.doubleValue() > 0)
-					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-
-			} else if (mostRestrictiveOccupancy != null && ML.equals(mostRestrictiveOccupancy.getType().getCode())) {
-				// MIXED LANDUSE
-
-				if ((ML_A_R.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_A_AF.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_A_RH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_A_HE.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_A_BH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_A_LH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_A_GH.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
-
-					if (plotArea.compareTo(BigDecimal.valueOf(100)) < 0) {
-
-					} else if (plotArea.compareTo(BigDecimal.valueOf(100)) > 0
-							&& plotArea.compareTo(BigDecimal.valueOf(300)) <= 0) {
-
-						if (coverParkingArea.doubleValue() > 0)
-							requiredCarParkArea += COVER_ECS * ECS_ONE_POINT_FIVE;
-						if (basementParkingArea.doubleValue() > 0)
-							requiredCarParkArea += BSMNT_ECS * ECS_ONE_POINT_FIVE;
-						if (openParkingArea.doubleValue() > 0)
-							requiredCarParkArea += OPEN_ECS_18 * ECS_ONE_POINT_FIVE;
-					} else if (plotArea.compareTo(BigDecimal.valueOf(300)) > 0
-							&& plotArea.compareTo(BigDecimal.valueOf(500)) <= 0) {
-
-						if (coverParkingArea.doubleValue() > 0)
-							requiredCarParkArea += COVER_ECS * ECS_TWO_POINT_FIVE;
-						if (basementParkingArea.doubleValue() > 0)
-							requiredCarParkArea += BSMNT_ECS * ECS_TWO_POINT_FIVE;
-						if (openParkingArea.doubleValue() > 0)
-							requiredCarParkArea += OPEN_ECS_18 * ECS_TWO_POINT_FIVE;
-					} else if (plotArea.compareTo(BigDecimal.valueOf(500)) > 0) {
-						BigDecimal builtupArea = totalBuiltupArea;
-
-						double requiredEcs = builtupArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_ONE_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-
-						if (coverParkingArea.doubleValue() > 0)
-							requiredCarParkArea += COVER_ECS * requiredEcs;
-						if (basementParkingArea.doubleValue() > 0)
-							requiredCarParkArea += BSMNT_ECS * requiredEcs;
-						if (openParkingArea.doubleValue() > 0)
-							requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-					}
-				}
-
-				if (mostRestrictiveOccupancy != null && (ML_F_RT.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_F_SH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_F_SM.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_F_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_F_WST.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| ML_F_WH.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
-
-					BigDecimal floorArea = totalFloorArea;
-					double requiredEcs = 0.0;
-
-					double requiredEcs2 = 0.0;
-
-					if (mostRestrictiveOccupancy != null
-							&& (ML_F_RT.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-									|| ML_F_SH.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_ZERO_POINT_FIVE)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-						requiredEcs2 = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_ONE_POINT_FIVE)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-
-					} else if (ML_F_SM.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_THREE_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-
-					} else if (ML_F_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-						requiredEcs2 = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_THREE_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-					} else if (ML_F_WST.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-							|| ML_F_WH.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-					}
-					LOGGER.info("requiredEcs " + requiredEcs);
-					LOGGER.info("requiredEcs2 " + requiredEcs2);
-
-					if (coverParkingArea.doubleValue() > 0)
-						requiredCarParkArea += COVER_ECS * requiredEcs;
-					if (basementParkingArea.doubleValue() > 0)
-						requiredCarParkArea += BSMNT_ECS * requiredEcs;
-					if (openParkingArea.doubleValue() > 0)
-						requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-
-				}
-
-			} else if (mostRestrictiveOccupancy != null && G.equals(mostRestrictiveOccupancy.getType().getCode())) {
-				if (mostRestrictiveOccupancy != null && (G_I.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) { // Industrial
-					// Use Floor area instead of built up area
-
-					BigDecimal floorArea = totalFloorArea;
-
-
-					double requiredEcs = 0.0;
-
-					if (plotArea.compareTo(BigDecimal.valueOf(50)) <= 0) {
-
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_ONE_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-
-					} else if (plotArea.compareTo(BigDecimal.valueOf(50)) > 0
-							&& plotArea.compareTo(BigDecimal.valueOf(400)) <= 0) {
-
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-
-					} else if (plotArea.compareTo(BigDecimal.valueOf(400)) > 0) {
-
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-
-					}
-
-					if (coverParkingArea.doubleValue() > 0)
-						requiredCarParkArea += COVER_ECS * requiredEcs;
-					if (basementParkingArea.doubleValue() > 0)
-						requiredCarParkArea += BSMNT_ECS * requiredEcs;
-					if (openParkingArea.doubleValue() > 0)
-						requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-
-				} else if (G_FI.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| G_SC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) { // Flatted Industry/ Service
-																							// Center
-					// Use Floor area instead of built up area *****
-
-					BigDecimal floorArea = totalFloorArea;
-
-
-					double requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-							.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-							.doubleValue();
-
-					if (coverParkingArea.doubleValue() > 0)
-						requiredCarParkArea += COVER_ECS * requiredEcs;
-					if (basementParkingArea.doubleValue() > 0)
-						requiredCarParkArea += BSMNT_ECS * requiredEcs;
-					if (openParkingArea.doubleValue() > 0)
-						requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-				}
-
-			} else if (mostRestrictiveOccupancy != null && T.equals(mostRestrictiveOccupancy.getType().getCode())) { // Transportation
-
-				BigDecimal floorArea = totalFloorArea;
-			
-				double requiredEcs = 0.0;
-
-				if (T_R.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {// Rail Terminal
-
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (T_I.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| T_B.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {// ISBT/Bus Terminal
-
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				}
-
-				if (coverParkingArea.doubleValue() > 0)
-					requiredCarParkArea += COVER_ECS * requiredEcs;
-				if (basementParkingArea.doubleValue() > 0)
-					requiredCarParkArea += BSMNT_ECS * requiredEcs;
-				if (openParkingArea.doubleValue() > 0)
-					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-
-			} else if (mostRestrictiveOccupancy != null && P.equals(mostRestrictiveOccupancy.getType().getCode())) { // Public
-																														// &
-																														// Semi
-																														// Public
-
-				BigDecimal floorArea = totalFloorArea;
-
-				double requiredEcs = 0.0;
-				if (P_O.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| P_I.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (P_D.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (P_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| P_A.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| P_B.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (P_C.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				}
-
-				if (coverParkingArea.doubleValue() > 0)
-					requiredCarParkArea += COVER_ECS * requiredEcs;
-				if (basementParkingArea.doubleValue() > 0)
-					requiredCarParkArea += BSMNT_ECS * requiredEcs;
-				if (openParkingArea.doubleValue() > 0)
-					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-
-			} else if (mostRestrictiveOccupancy != null && C.equals(mostRestrictiveOccupancy.getType().getCode())) {// Health
-																													// Services
-
-				BigDecimal floorArea = totalFloorArea;
-				
-				double requiredEcs = 0.0;
-
-				if (C_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| C_T.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (C_NH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| C_PC.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| C_D.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| C_DC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (C_VH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| C_VD.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_ONE_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (C_NAPI.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				}
-
-				if (coverParkingArea.doubleValue() > 0)
-					requiredCarParkArea += COVER_ECS * requiredEcs;
-				if (basementParkingArea.doubleValue() > 0)
-					requiredCarParkArea += BSMNT_ECS * requiredEcs;
-				if (openParkingArea.doubleValue() > 0)
-					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-
-			} else if (mostRestrictiveOccupancy != null && B.equals(mostRestrictiveOccupancy.getType().getCode())) { // Education
-
-				BigDecimal floorArea = totalFloorArea;
-				
-				double requiredEcs = 0.0;
-				if (B_NS.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (B_PS.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| B_UPS.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (B_SS.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| B_HSS.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (B_C.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| B_U.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (B_SFMC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-
-				} else if (B_ERIC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-
-					if (B_ERIC_AC.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-					} else if (B_ERIC_AR.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-					} else if (B_ERIC_SCC.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-					} else if (B_ERIC_POS.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-					}
-
-				} else if (B_SP.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				}
-
-				if (coverParkingArea.doubleValue() > 0)
-					requiredCarParkArea += COVER_ECS * requiredEcs;
-				if (basementParkingArea.doubleValue() > 0)
-					requiredCarParkArea += BSMNT_ECS * requiredEcs;
-				if (openParkingArea.doubleValue() > 0)
-					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-
-			} else if (mostRestrictiveOccupancy != null && U.equals(mostRestrictiveOccupancy.getType().getCode())) { // Security
-																														// Services
-				BigDecimal floorArea = totalFloorArea;
-				double requiredEcs = 0.0;
-				if (U_PP.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (U_PS.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					if (U_PS_DOB.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-					} else if (U_PS_DJ.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-					} else if (U_PS_PTI.equals(mostRestrictiveOccupancy.getUsage().getCode())
-							|| U_PS_PTC.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
-						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
-								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
-								.doubleValue();
-					}
-				} else if (U_DMC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				} else if (U_FP.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| U_FS.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| U_FTI.equals(mostRestrictiveOccupancy.getSubtype().getCode())
-						|| U_FTC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
-					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
-							.setScale(0, RoundingMode.UP).doubleValue();
-				}
-
-				if (coverParkingArea.doubleValue() > 0)
-					requiredCarParkArea += COVER_ECS * requiredEcs;
-				if (basementParkingArea.doubleValue() > 0)
-					requiredCarParkArea += BSMNT_ECS * requiredEcs;
-				if (openParkingArea.doubleValue() > 0)
-					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
-
-			} else {
-
-			}
-		}
-
-		BigDecimal requiredCarParkingArea = Util.roundOffTwoDecimal(BigDecimal.valueOf(requiredCarParkArea));
-		BigDecimal totalProvidedCarParkingArea = Util.roundOffTwoDecimal(totalProvidedCarParkArea);
-//		BigDecimal requiredVisitorParkingArea = Util.roundOffTwoDecimal(BigDecimal.valueOf(requiredVisitorParkArea));
-//		BigDecimal providedVisitorParkingArea = Util.roundOffTwoDecimal(providedVisitorParkArea);
-
-		LOGGER.info(" requiredCarParkingArea" + requiredCarParkingArea);
-		LOGGER.info(" totalProvidedCarParkingArea" + totalProvidedCarParkingArea);
-
-		// checkDimensionForTwoWheelerParking(pl, helper);
-		// checkAreaForLoadUnloadSpaces(pl);
-		if (totalProvidedCarParkArea.doubleValue() == 0) {
-			pl.addError(SUB_RULE_40_2_DESCRIPTION,
-					getLocaleMessage("msg.error.not.defined", SUB_RULE_40_2_DESCRIPTION));
-		} else if (requiredCarParkArea > 0 && totalProvidedCarParkingArea.compareTo(requiredCarParkingArea) < 0) {
-			setReportOutputDetails(pl, SUB_RULE_40_2, SUB_RULE_40_2_DESCRIPTION, requiredCarParkingArea + SQMTRS,
-					totalProvidedCarParkingArea + SQMTRS, Result.Not_Accepted.getResultVal());
-		} else {
-			setReportOutputDetails(pl, SUB_RULE_40_2, SUB_RULE_40_2_DESCRIPTION, requiredCarParkingArea + SQMTRS,
-					totalProvidedCarParkingArea + SQMTRS, Result.Accepted.getResultVal());
-		}
-//		if (requiredVisitorParkArea > 0 && providedVisitorParkArea.compareTo(requiredVisitorParkingArea) < 0) {
-//			setReportOutputDetails(pl, SUB_RULE_40_10, SUB_RULE_40_10_DESCRIPTION, requiredVisitorParkingArea + SQMTRS,
-//					providedVisitorParkArea + SQMTRS, Result.Not_Accepted.getResultVal());
-//		} else if (requiredVisitorParkArea > 0) {
-//			setReportOutputDetails(pl, SUB_RULE_40_10, SUB_RULE_40_10_DESCRIPTION, requiredVisitorParkingArea + SQMTRS,
-//					providedVisitorParkingArea + SQMTRS, Result.Accepted.getResultVal());
+//
+////				stiltParkingArea = stiltParkingArea.add(floor.getParking().getStilts().stream()
+////						.map(Measurement::getArea).reduce(BigDecimal.ZERO, BigDecimal::add));
+//
+//				basementParkingArea = basementParkingArea.add(floor.getParking().getBasementCars().stream()
+//						.map(Measurement::getArea).reduce(BigDecimal.ZERO, BigDecimal::add));
+//			}
 //		}
-
-		LOGGER.info("******************Require no of Car Parking***************" + helper.totalRequiredCarParking);
+//		BigDecimal openParkingArea = pl.getParkingDetails().getOpenCars().stream().map(Measurement::getArea)
+//				.reduce(BigDecimal.ZERO, BigDecimal::add);
+//
+//		BigDecimal totalProvidedCarParkArea = openParkingArea.add(coverParkingArea).add(basementParkingArea);
+//		helper.totalRequiredCarParking += openParkingArea.doubleValue() / OPEN_ECS_18;
+//		helper.totalRequiredCarParking += coverParkingArea.doubleValue() / COVER_ECS;
+//		helper.totalRequiredCarParking += basementParkingArea.doubleValue() / BSMNT_ECS;
+////		helper.totalRequiredCarParking += stiltParkingArea.doubleValue() / COVER_ECS;
+//
+//		LOGGER.info(" totalProvidedCarParkArea : " + totalProvidedCarParkArea);
+//
+//		Double requiredCarParkArea = 0d;
+//		Double requiredVisitorParkArea = 0d;
+//
+//		BigDecimal providedVisitorParkArea = BigDecimal.ZERO;
+//
+////        validateSpecialParking(pl, helper, totalBuiltupArea);
+//
+//		if (mostRestrictiveOccupancy != null) {
+//			if (mostRestrictiveOccupancy != null && totalBuiltupArea != null
+//					&& A.equals(mostRestrictiveOccupancy.getType().getCode())) {
+//
+//				if ((A_R.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| A_AF.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| A_RH.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
+//
+//					if (plotArea.compareTo(BigDecimal.valueOf(100)) < 0) {
+//
+//					} else if (plotArea.compareTo(BigDecimal.valueOf(100)) > 0
+//							&& plotArea.compareTo(BigDecimal.valueOf(300)) <= 0) {
+//
+//						if (coverParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += COVER_ECS * ECS_ONE_POINT_FIVE;
+//						if (basementParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += BSMNT_ECS * ECS_ONE_POINT_FIVE;
+//						if (openParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += OPEN_ECS_18 * ECS_ONE_POINT_FIVE;
+//					} else if (plotArea.compareTo(BigDecimal.valueOf(300)) > 0
+//							&& plotArea.compareTo(BigDecimal.valueOf(500)) <= 0) {
+//
+//						if (coverParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += COVER_ECS * ECS_TWO_POINT_FIVE;
+//						if (basementParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += BSMNT_ECS * ECS_TWO_POINT_FIVE;
+//						if (openParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += OPEN_ECS_18 * ECS_TWO_POINT_FIVE;
+//					} else if (plotArea.compareTo(BigDecimal.valueOf(500)) > 0) {
+//						BigDecimal builtupArea = totalBuiltupArea;
+////								.subtract(totalBuiltupArea.multiply(BigDecimal.valueOf(0.15)));
+//						double requiredEcs = builtupArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_ONE_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//
+//						if (coverParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += COVER_ECS * requiredEcs;
+//						if (basementParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//						if (openParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//					}
+//				} else if (A_HE.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| A_BH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| A_LH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| A_GH.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//
+//					if (plotArea.compareTo(BigDecimal.valueOf(100)) < 0) {
+//
+//					} else if (plotArea.compareTo(BigDecimal.valueOf(100)) > 0) {
+//
+//						if (coverParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += COVER_ECS * ECS_ONE_POINT_FIVE;
+//						if (basementParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += BSMNT_ECS * ECS_ONE_POINT_FIVE;
+//						if (openParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += OPEN_ECS_18 * ECS_ONE_POINT_FIVE;
+//					}
+//
+//				}
+//
+//			} else if (mostRestrictiveOccupancy != null && F.equals(mostRestrictiveOccupancy.getType().getCode())) {
+//				BigDecimal floorArea = totalFloorArea;
+//				double requiredEcs = 0.0;
+//
+//				double requiredEcs2 = 0.0;
+//
+//				if (mostRestrictiveOccupancy != null && (F_RT.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| F_SH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| F_CB.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_ZERO_POINT_FIVE))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//					requiredEcs2 = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_ONE_POINT_FIVE))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//
+//				} else if (F_SM.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_THREE_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//
+//				} else if (F_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//					requiredEcs2 = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_THREE_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (F_WST.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| F_WH.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				}
+//				LOGGER.info("requiredEcs " + requiredEcs);
+//				LOGGER.info("requiredEcs2 " + requiredEcs2);
+//
+//				if (coverParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += COVER_ECS * requiredEcs;
+//				if (basementParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//				if (openParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//
+//			} else if (mostRestrictiveOccupancy != null && ML.equals(mostRestrictiveOccupancy.getType().getCode())) {
+//				// MIXED LANDUSE
+//
+//				if ((ML_A_R.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_A_AF.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_A_RH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_A_HE.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_A_BH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_A_LH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_A_GH.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
+//
+//					if (plotArea.compareTo(BigDecimal.valueOf(100)) < 0) {
+//
+//					} else if (plotArea.compareTo(BigDecimal.valueOf(100)) > 0
+//							&& plotArea.compareTo(BigDecimal.valueOf(300)) <= 0) {
+//
+//						if (coverParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += COVER_ECS * ECS_ONE_POINT_FIVE;
+//						if (basementParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += BSMNT_ECS * ECS_ONE_POINT_FIVE;
+//						if (openParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += OPEN_ECS_18 * ECS_ONE_POINT_FIVE;
+//					} else if (plotArea.compareTo(BigDecimal.valueOf(300)) > 0
+//							&& plotArea.compareTo(BigDecimal.valueOf(500)) <= 0) {
+//
+//						if (coverParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += COVER_ECS * ECS_TWO_POINT_FIVE;
+//						if (basementParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += BSMNT_ECS * ECS_TWO_POINT_FIVE;
+//						if (openParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += OPEN_ECS_18 * ECS_TWO_POINT_FIVE;
+//					} else if (plotArea.compareTo(BigDecimal.valueOf(500)) > 0) {
+//						BigDecimal builtupArea = totalBuiltupArea;
+//
+//						double requiredEcs = builtupArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_ONE_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//
+//						if (coverParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += COVER_ECS * requiredEcs;
+//						if (basementParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//						if (openParkingArea.doubleValue() > 0)
+//							requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//					}
+//				}
+//
+//				if (mostRestrictiveOccupancy != null && (ML_F_RT.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_F_SH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_F_SM.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_F_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_F_WST.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| ML_F_WH.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
+//
+//					BigDecimal floorArea = totalFloorArea;
+//					double requiredEcs = 0.0;
+//
+//					double requiredEcs2 = 0.0;
+//
+//					if (mostRestrictiveOccupancy != null
+//							&& (ML_F_RT.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//									|| ML_F_SH.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_ZERO_POINT_FIVE)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//						requiredEcs2 = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_ONE_POINT_FIVE)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//
+//					} else if (ML_F_SM.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_THREE_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//
+//					} else if (ML_F_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//						requiredEcs2 = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_THREE_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//					} else if (ML_F_WST.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//							|| ML_F_WH.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//					}
+//					LOGGER.info("requiredEcs " + requiredEcs);
+//					LOGGER.info("requiredEcs2 " + requiredEcs2);
+//
+//					if (coverParkingArea.doubleValue() > 0)
+//						requiredCarParkArea += COVER_ECS * requiredEcs;
+//					if (basementParkingArea.doubleValue() > 0)
+//						requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//					if (openParkingArea.doubleValue() > 0)
+//						requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//
+//				}
+//
+//			} else if (mostRestrictiveOccupancy != null && G.equals(mostRestrictiveOccupancy.getType().getCode())) {
+//				if (mostRestrictiveOccupancy != null && (G_I.equals(mostRestrictiveOccupancy.getSubtype().getCode()))) { // Industrial
+//					// Use Floor area instead of built up area
+//
+//					BigDecimal floorArea = totalFloorArea;
+//
+//
+//					double requiredEcs = 0.0;
+//
+//					if (plotArea.compareTo(BigDecimal.valueOf(50)) <= 0) {
+//
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_ONE_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//
+//					} else if (plotArea.compareTo(BigDecimal.valueOf(50)) > 0
+//							&& plotArea.compareTo(BigDecimal.valueOf(400)) <= 0) {
+//
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//
+//					} else if (plotArea.compareTo(BigDecimal.valueOf(400)) > 0) {
+//
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//
+//					}
+//
+//					if (coverParkingArea.doubleValue() > 0)
+//						requiredCarParkArea += COVER_ECS * requiredEcs;
+//					if (basementParkingArea.doubleValue() > 0)
+//						requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//					if (openParkingArea.doubleValue() > 0)
+//						requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//
+//				} else if (G_FI.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| G_SC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) { // Flatted Industry/ Service
+//																							// Center
+//					// Use Floor area instead of built up area *****
+//
+//					BigDecimal floorArea = totalFloorArea;
+//
+//
+//					double requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//							.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//							.doubleValue();
+//
+//					if (coverParkingArea.doubleValue() > 0)
+//						requiredCarParkArea += COVER_ECS * requiredEcs;
+//					if (basementParkingArea.doubleValue() > 0)
+//						requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//					if (openParkingArea.doubleValue() > 0)
+//						requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//				}
+//
+//			} else if (mostRestrictiveOccupancy != null && T.equals(mostRestrictiveOccupancy.getType().getCode())) { // Transportation
+//
+//				BigDecimal floorArea = totalFloorArea;
+//			
+//				double requiredEcs = 0.0;
+//
+//				if (T_R.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {// Rail Terminal
+//
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (T_I.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| T_B.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {// ISBT/Bus Terminal
+//
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				}
+//
+//				if (coverParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += COVER_ECS * requiredEcs;
+//				if (basementParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//				if (openParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//
+//			} else if (mostRestrictiveOccupancy != null && P.equals(mostRestrictiveOccupancy.getType().getCode())) { // Public
+//																														// &
+//																														// Semi
+//																														// Public
+//
+//				BigDecimal floorArea = totalFloorArea;
+//
+//				double requiredEcs = 0.0;
+//				if (P_O.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| P_I.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (P_D.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (P_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| P_A.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| P_B.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (P_C.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				}
+//
+//				if (coverParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += COVER_ECS * requiredEcs;
+//				if (basementParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//				if (openParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//
+//			} else if (mostRestrictiveOccupancy != null && C.equals(mostRestrictiveOccupancy.getType().getCode())) {// Health
+//																													// Services
+//
+//				BigDecimal floorArea = totalFloorArea;
+//				
+//				double requiredEcs = 0.0;
+//
+//				if (C_H.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| C_T.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (C_NH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| C_PC.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| C_D.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| C_DC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (C_VH.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| C_VD.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_ONE_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (C_NAPI.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				}
+//
+//				if (coverParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += COVER_ECS * requiredEcs;
+//				if (basementParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//				if (openParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//
+//			} else if (mostRestrictiveOccupancy != null && B.equals(mostRestrictiveOccupancy.getType().getCode())) { // Education
+//
+//				BigDecimal floorArea = totalFloorArea;
+//				
+//				double requiredEcs = 0.0;
+//				if (B_NS.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (B_PS.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| B_UPS.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (B_SS.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| B_HSS.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (B_C.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| B_U.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (B_SFMC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//
+//				} else if (B_ERIC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//
+//					if (B_ERIC_AC.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//					} else if (B_ERIC_AR.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//					} else if (B_ERIC_SCC.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//					} else if (B_ERIC_POS.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//					}
+//
+//				} else if (B_SP.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				}
+//
+//				if (coverParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += COVER_ECS * requiredEcs;
+//				if (basementParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//				if (openParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//
+//			} else if (mostRestrictiveOccupancy != null && U.equals(mostRestrictiveOccupancy.getType().getCode())) { // Security
+//																														// Services
+//				BigDecimal floorArea = totalFloorArea;
+//				double requiredEcs = 0.0;
+//				if (U_PP.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (U_PS.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					if (U_PS_DOB.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//					} else if (U_PS_DJ.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//					} else if (U_PS_PTI.equals(mostRestrictiveOccupancy.getUsage().getCode())
+//							|| U_PS_PTC.equals(mostRestrictiveOccupancy.getUsage().getCode())) {
+//						requiredEcs = floorArea.divide(AREA_PER_ECS_100)
+//								.multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO)).setScale(0, RoundingMode.UP)
+//								.doubleValue();
+//					}
+//				} else if (U_DMC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				} else if (U_FP.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| U_FS.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| U_FTI.equals(mostRestrictiveOccupancy.getSubtype().getCode())
+//						|| U_FTC.equals(mostRestrictiveOccupancy.getSubtype().getCode())) {
+//					requiredEcs = floorArea.divide(AREA_PER_ECS_100).multiply(BigDecimal.valueOf(ECS_TWO_POINT_ZERO))
+//							.setScale(0, RoundingMode.UP).doubleValue();
+//				}
+//
+//				if (coverParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += COVER_ECS * requiredEcs;
+//				if (basementParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += BSMNT_ECS * requiredEcs;
+//				if (openParkingArea.doubleValue() > 0)
+//					requiredCarParkArea += OPEN_ECS_18 * requiredEcs;
+//
+//			} else {
+//
+//			}
+//		}
+//
+//		BigDecimal requiredCarParkingArea = Util.roundOffTwoDecimal(BigDecimal.valueOf(requiredCarParkArea));
+//		BigDecimal totalProvidedCarParkingArea = Util.roundOffTwoDecimal(totalProvidedCarParkArea);
+////		BigDecimal requiredVisitorParkingArea = Util.roundOffTwoDecimal(BigDecimal.valueOf(requiredVisitorParkArea));
+////		BigDecimal providedVisitorParkingArea = Util.roundOffTwoDecimal(providedVisitorParkArea);
+//
+//		LOGGER.info(" requiredCarParkingArea" + requiredCarParkingArea);
+//		LOGGER.info(" totalProvidedCarParkingArea" + totalProvidedCarParkingArea);
+//
+//		// checkDimensionForTwoWheelerParking(pl, helper);
+//		// checkAreaForLoadUnloadSpaces(pl);
+//		if (totalProvidedCarParkArea.doubleValue() == 0) {
+//			pl.addError(SUB_RULE_40_2_DESCRIPTION,
+//					getLocaleMessage("msg.error.not.defined", SUB_RULE_40_2_DESCRIPTION));
+//		} else if (requiredCarParkArea > 0 && totalProvidedCarParkingArea.compareTo(requiredCarParkingArea) < 0) {
+//			setReportOutputDetails(pl, SUB_RULE_40_2, SUB_RULE_40_2_DESCRIPTION, requiredCarParkingArea + SQMTRS,
+//					totalProvidedCarParkingArea + SQMTRS, Result.Not_Accepted.getResultVal());
+//		} else {
+//			setReportOutputDetails(pl, SUB_RULE_40_2, SUB_RULE_40_2_DESCRIPTION, requiredCarParkingArea + SQMTRS,
+//					totalProvidedCarParkingArea + SQMTRS, Result.Accepted.getResultVal());
+//		}
+////		if (requiredVisitorParkArea > 0 && providedVisitorParkArea.compareTo(requiredVisitorParkingArea) < 0) {
+////			setReportOutputDetails(pl, SUB_RULE_40_10, SUB_RULE_40_10_DESCRIPTION, requiredVisitorParkingArea + SQMTRS,
+////					providedVisitorParkArea + SQMTRS, Result.Not_Accepted.getResultVal());
+////		} else if (requiredVisitorParkArea > 0) {
+////			setReportOutputDetails(pl, SUB_RULE_40_10, SUB_RULE_40_10_DESCRIPTION, requiredVisitorParkingArea + SQMTRS,
+////					providedVisitorParkingArea + SQMTRS, Result.Accepted.getResultVal());
+////		}
+//
+//		LOGGER.info("******************Require no of Car Parking***************" + helper.totalRequiredCarParking);
 	}
 
 	private void setReportOutputDetails(Plan pl, String ruleNo, String ruleDesc, String expected, String actual,

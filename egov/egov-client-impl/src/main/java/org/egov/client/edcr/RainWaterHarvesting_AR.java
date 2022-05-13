@@ -96,7 +96,6 @@ public class RainWaterHarvesting_AR extends RainWaterHarvesting {
 	public Plan process(Plan pl) {
 		try {
 
-			LOG.info("Rain water Harvestin for Arunachal Pradesh");
 			HashMap<String, String> errors = new HashMap<>();
 
 			scrutinyDetail = new ScrutinyDetail();
@@ -114,35 +113,33 @@ public class RainWaterHarvesting_AR extends RainWaterHarvesting {
 					? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
 					: null;
 
-			LOG.info("PLOT Area : " + plotArea);
 
-			if (plotArea.compareTo(HUNDRED) >= 0) {
-				BigDecimal roundOffPlotArea = plotArea.divide(HUNDRED);
-				expectedTankCapacity = BigDecimal.valueOf(55000)
-						.multiply(roundOffPlotArea.setScale(0, BigDecimal.ROUND_HALF_UP));
-
-				LOG.info("Rainwater harvest  Expected tank capacity:: " + expectedTankCapacity);
-
-				if (mostRestrictiveFarHelper != null && mostRestrictiveFarHelper.getType() != null
-						&& plotArea.compareTo(HUNDRED) >= 0) {
-
-					addOutput(pl, errors, subRule, subRuleDesc, expectedTankCapacity.toString());
-				}
-
-				validateRWH(pl, errors);
-				LOG.info("Rainwater harvest  :: " + pl.getUtility().getRainWaterHarvest());
-				LOG.info("Rainwater harvest tank capacity :: " + pl.getUtility().getRainWaterHarvestingTankCapacity());
-
-				if (pl.getUtility() != null && !pl.getUtility().getRainWaterHarvest().isEmpty()
-						&& pl.getUtility().getRainWaterHarvestingTankCapacity() != null) {
-					Boolean valid = false;
-
-					if (pl.getUtility().getRainWaterHarvestingTankCapacity().compareTo(expectedTankCapacity) >= 0) {
-						valid = true;
-					}
-					processRWHTankCapacity(pl, "", subRule, subRuleDesc, expectedTankCapacity, valid);
-				}
-			}
+//			if (plotArea.compareTo(HUNDRED) >= 0) {
+//				BigDecimal roundOffPlotArea = plotArea.divide(HUNDRED);
+//				expectedTankCapacity = BigDecimal.valueOf(55000)
+//						.multiply(roundOffPlotArea.setScale(0, BigDecimal.ROUND_HALF_UP));
+//
+//
+//				if (mostRestrictiveFarHelper != null && mostRestrictiveFarHelper.getType() != null
+//						&& plotArea.compareTo(HUNDRED) >= 0) {
+//
+//					addOutput(pl, errors, subRule, subRuleDesc, expectedTankCapacity.toString());
+//				}
+//
+//				validateRWH(pl, errors);
+//				LOG.info("Rainwater harvest  :: " + pl.getUtility().getRainWaterHarvest());
+//				LOG.info("Rainwater harvest tank capacity :: " + pl.getUtility().getRainWaterHarvestingTankCapacity());
+//
+//				if (pl.getUtility() != null && !pl.getUtility().getRainWaterHarvest().isEmpty()
+//						&& pl.getUtility().getRainWaterHarvestingTankCapacity() != null) {
+//					Boolean valid = false;
+//
+//					if (pl.getUtility().getRainWaterHarvestingTankCapacity().compareTo(expectedTankCapacity) >= 0) {
+//						valid = true;
+//					}
+//					processRWHTankCapacity(pl, "", subRule, subRuleDesc, expectedTankCapacity, valid);
+//				}
+//			}
 
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -194,33 +191,6 @@ public class RainWaterHarvesting_AR extends RainWaterHarvesting {
 		}
 	}
 
-	/*
-	 * private boolean processRWH(Plan plan, String rule, String subRule, String
-	 * subRuleDesc) { if (!plan.getUtility().getRainWaterHarvest().isEmpty()) {
-	 * setReportOutputDetails(plan, subRule, subRuleDesc, "", OBJECTDEFINED_DESC,
-	 * Result.Accepted.getResultVal()); return true; } else if
-	 * (plan.getUtility().getRainWaterHarvest().isEmpty()) {
-	 * setReportOutputDetails(plan, subRule, subRuleDesc, "", OBJECTNOTDEFINED_DESC,
-	 * Result.Not_Accepted.getResultVal()); return true; } return false; } private
-	 * boolean checkOccupancyTypeForRWH(OccupancyType occupancyType) { return
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_A2) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_A3) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_B1) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_B2) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_B3) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_C) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_C1) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_C2) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_C3) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_D) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_D1) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_D2) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_E) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_G1) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_G2) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_I1) ||
-	 * occupancyType.equals(OccupancyType.OCCUPANCY_I2); }
-	 */
 
 	private void setReportOutputDetails(Plan pl, String ruleNo, String ruleDesc, String expected, String actual,
 			String status) {

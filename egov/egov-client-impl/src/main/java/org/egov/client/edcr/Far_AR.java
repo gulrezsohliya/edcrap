@@ -47,47 +47,6 @@
 
 package org.egov.client.edcr;
 
-import static org.egov.edcr.constants.DxfFileConstants.A;
-import static org.egov.edcr.constants.DxfFileConstants.A2;
-
-import static org.egov.edcr.constants.DxfFileConstants.A_FH;
-import static org.egov.edcr.constants.DxfFileConstants.A_R;
-import static org.egov.edcr.constants.DxfFileConstants.A_SA;
-import static org.egov.edcr.constants.DxfFileConstants.A_AF;
-import static org.egov.edcr.constants.DxfFileConstants.A_HE;
-
-import static org.egov.edcr.constants.DxfFileConstants.B2;
-import static org.egov.edcr.constants.DxfFileConstants.B_PS;
-import static org.egov.edcr.constants.DxfFileConstants.D_A;
-import static org.egov.edcr.constants.DxfFileConstants.D_B;
-import static org.egov.edcr.constants.DxfFileConstants.D_C;
-import static org.egov.edcr.constants.DxfFileConstants.E_CLG;
-import static org.egov.edcr.constants.DxfFileConstants.E_EARC;
-import static org.egov.edcr.constants.DxfFileConstants.E_NS;
-import static org.egov.edcr.constants.DxfFileConstants.E_PS;
-import static org.egov.edcr.constants.DxfFileConstants.E_SACA;
-import static org.egov.edcr.constants.DxfFileConstants.E_SFDAP;
-import static org.egov.edcr.constants.DxfFileConstants.E_SFMC;
-import static org.egov.edcr.constants.DxfFileConstants.F;
-import static org.egov.edcr.constants.DxfFileConstants.F_H;
-import static org.egov.edcr.constants.DxfFileConstants.F_CB;
-
-import static org.egov.edcr.constants.DxfFileConstants.H_PP;
-import static org.egov.edcr.constants.DxfFileConstants.M_DFPAB;
-import static org.egov.edcr.constants.DxfFileConstants.M_HOTHC;
-import static org.egov.edcr.constants.DxfFileConstants.M_NAPI;
-import static org.egov.edcr.constants.DxfFileConstants.M_OHF;
-import static org.egov.edcr.constants.DxfFileConstants.M_VH;
-import static org.egov.edcr.constants.DxfFileConstants.S_BH;
-import static org.egov.edcr.constants.DxfFileConstants.S_CA;
-import static org.egov.edcr.constants.DxfFileConstants.S_CRC;
-import static org.egov.edcr.constants.DxfFileConstants.S_ECFG;
-import static org.egov.edcr.constants.DxfFileConstants.S_ICC;
-import static org.egov.edcr.constants.DxfFileConstants.S_MCH;
-import static org.egov.edcr.constants.DxfFileConstants.S_SAS;
-import static org.egov.edcr.constants.DxfFileConstants.S_SC;
-import static org.egov.edcr.constants.DxfFileConstants.F_RT;
-
 import static org.egov.edcr.utility.DcrConstants.DECIMALDIGITS_MEASUREMENTS;
 import static org.egov.edcr.utility.DcrConstants.OBJECTNOTDEFINED;
 import static org.egov.edcr.utility.DcrConstants.PLOT_AREA;
@@ -107,7 +66,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.egov.client.constants.DxfFileConstants_AR;
+//import org.egov.client.constants.DxfFileConstants_AR;
 import org.egov.common.entity.edcr.Block;
 import org.egov.common.entity.edcr.Building;
 import org.egov.common.entity.edcr.FarDetails;
@@ -116,6 +75,7 @@ import org.egov.common.entity.edcr.Measurement;
 import org.egov.common.entity.edcr.Occupancy;
 import org.egov.common.entity.edcr.OccupancyTypeHelper;
 import org.egov.common.entity.edcr.Plan;
+import org.egov.common.entity.edcr.Plot;
 import org.egov.common.entity.edcr.Result;
 import org.egov.common.entity.edcr.ScrutinyDetail;
 import org.egov.edcr.constants.DxfFileConstants;
@@ -254,7 +214,6 @@ public class Far_AR extends Far {
 //		decideNocIsRequired(pl); is it required?
 		try {
 			HashMap<String, String> errorMsgs = new HashMap<>();
-			LOG.info(pl.getPlanInfoProperties().get("TERRAIN"));
 			int errors = pl.getErrors().size();
 			validate(pl);
 			int validatedErrors = pl.getErrors().size();
@@ -281,15 +240,8 @@ public class Far_AR extends Far {
 					for (Occupancy occupancy : flr.getOccupancies()) {
 
 						validate2(pl, blk, flr, occupancy);
-						/*
-						 * occupancy.setCarpetArea(occupancy.getFloorArea().multiply
-						 * (BigDecimal.valueOf(0.80))); occupancy
-						 * .setExistingCarpetArea(occupancy.getExistingFloorArea().
-						 * multiply(BigDecimal.valueOf(0.80)));
-						 */
-
-						bltUpArea = bltUpArea.add(
-								occupancy.getBuiltUpArea() == null ? BigDecimal.valueOf(0) : occupancy.getBuiltUpArea());
+						bltUpArea = bltUpArea.add(occupancy.getBuiltUpArea() == null ? BigDecimal.valueOf(0)
+								: occupancy.getBuiltUpArea());
 						existingBltUpArea = existingBltUpArea
 								.add(occupancy.getExistingBuiltUpArea() == null ? BigDecimal.valueOf(0)
 										: occupancy.getExistingBuiltUpArea());
@@ -302,7 +254,7 @@ public class Far_AR extends Far {
 				/*
 				 * This is hard coded for testing
 				 */
-				building.setTotalFloorArea(new BigDecimal(456));
+				building.setTotalFloorArea(flrArea);
 				building.setTotalBuitUpArea(bltUpArea);
 				building.setTotalExistingBuiltUpArea(existingBltUpArea);
 				building.setTotalExistingFloorArea(existingFlrArea);
@@ -321,16 +273,9 @@ public class Far_AR extends Far {
 				// Find Occupancies by block and add
 				Set<OccupancyTypeHelper> occupancyByBlock = new HashSet<>();
 				for (Floor flr : building.getFloors()) {
-					LOG.info("floor:: " + flr.getNumber());
-					LOG.info("no of floors---" + flr.getOccupancies().size());
-
 					for (Occupancy occupancy : flr.getOccupancies()) {
-						LOG.info("occupancytype====" + occupancy.getLength());
-//						LOG.info("occupancytype2===="+occupancy.getTypeHelper().getType().getName().equals(null));
 						if (occupancy.getTypeHelper().getType() != null)
-							LOG.info("get color code:" + occupancy.getTypeHelper().getSubtype().getColor());
-//							LOG.info("Mika_AP FAR occupancy.getTypeHelper() 1 :" + occupancy.getTypeHelper().getSubtype().getName());
-						occupancyByBlock.add(occupancy.getTypeHelper());
+							occupancyByBlock.add(occupancy.getTypeHelper());
 					}
 				}
 
@@ -346,15 +291,9 @@ public class Far_AR extends Far {
 					BigDecimal blockWiseExistingBuiltupArea = BigDecimal.ZERO;
 					for (Floor flr : blk.getBuilding().getFloors()) {
 						for (Occupancy occupancy : flr.getOccupancies()) {
-//							LOG.info("occupancyType.getType() :: " + occupancyType.getType().getCode());
-							if (occupancyType.getType() != null && occupancy.getTypeHelper().getType() != null && occupancy
-									.getTypeHelper().getType().getCode().equals(occupancyType.getType().getCode())) {
-								LOG.info("Mika_AP FAR occupancy.getTypeHelper().getType().getCode() :"
-										+ occupancy.getTypeHelper().getType().getCode());
-								LOG.info("Mika_AP FAR occupancy.getTypeHelper().getSubtype().getCode() :"
-										+ occupancy.getTypeHelper().getSubtype().getCode());
-								// LOG.info("Mika_AP FAR occupancy.getTypeHelper().getUsage().getCode() :"+
-								// occupancy.getTypeHelper().getUsage().getCode());
+							if (occupancyType.getType() != null && occupancy.getTypeHelper().getType() != null
+									&& occupancy.getTypeHelper().getType().getCode()
+											.equals(occupancyType.getType().getCode())) {
 								blockWiseFloorArea = blockWiseFloorArea.add(occupancy.getFloorArea());
 								blockWiseBuiltupArea = blockWiseBuiltupArea
 										.add(occupancy.getBuiltUpArea() == null ? BigDecimal.valueOf(0)
@@ -390,7 +329,6 @@ public class Far_AR extends Far {
 				Set<OccupancyTypeHelper> setOfOccupancyTypes = new HashSet<>(listOfOccupancyTypes);
 
 				List<Occupancy> listOfOccupanciesOfAParticularblock = new ArrayList<>();
-				// for each distinct converted occupancy types
 				for (OccupancyTypeHelper occupancyType : setOfOccupancyTypes) {
 					if (occupancyType != null) {
 						Occupancy occupancy = new Occupancy();
@@ -433,7 +371,7 @@ public class Far_AR extends Far {
 
 					for (Occupancy occupancy : listOfOccupanciesOfAParticularblock) {
 						if (occupancy.getTypeHelper().getSubtype() != null
-								&& A_R.equals(occupancy.getTypeHelper().getSubtype().getCode()))
+								&& R.equals(occupancy.getTypeHelper().getType().getCode()))
 							singleFamilyBuildingTypeOccupancyPresent = true;
 						else {
 							otherThanSingleFamilyOccupancyTypePresent = true;
@@ -449,7 +387,7 @@ public class Far_AR extends Far {
 						if (occupancy.getTypeHelper().getType() != null) {
 							// setting residentialBuilding
 							int residentialOccupancyType = 0;
-							if (A.equals(occupancy.getTypeHelper().getType().getCode())) {
+							if (R.equals(occupancy.getTypeHelper().getType().getCode())) {
 								residentialOccupancyType = 1;
 							}
 							if (residentialOccupancyType == 0) {
@@ -465,8 +403,8 @@ public class Far_AR extends Far {
 						if (occupancy.getTypeHelper().getType() != null) {
 							// setting residentialOrCommercial Occupancy Type
 							int residentialOrCommercialOccupancyType = 0;
-							if (A.equals(occupancy.getTypeHelper().getType().getCode())
-									|| F.equals(occupancy.getTypeHelper().getType().getCode())) {
+							if (R.equals(occupancy.getTypeHelper().getType().getCode())
+									|| C.equals(occupancy.getTypeHelper().getType().getCode())) {
 								residentialOrCommercialOccupancyType = 1;
 							}
 							if (residentialOrCommercialOccupancyType == 0) {
@@ -535,10 +473,11 @@ public class Far_AR extends Far {
 					}
 
 					if (mostRestrictiveFar != null && mostRestrictiveFar.getConvertedSubtype() != null
-							&& !A_R.equals(mostRestrictiveFar.getSubtype().getCode())) {
+							&& !R.equals(mostRestrictiveFar.getType().getCode())) {
 						if (carpetArea.compareTo(BigDecimal.ZERO) == 0) {
 							pl.addError("Carpet area in block " + blk.getNumber() + "floor " + flr.getNumber(),
-									"Carpet area is not defined in block " + blk.getNumber() + "floor " + flr.getNumber());
+									"Carpet area is not defined in block " + blk.getNumber() + "floor "
+											+ flr.getNumber());
 						}
 
 						if (existingBltUpArea.compareTo(BigDecimal.ZERO) > 0
@@ -594,7 +533,8 @@ public class Far_AR extends Far {
 					for (Block block : pl.getBlocks()) {
 						for (Occupancy buildingOccupancy : block.getBuilding().getOccupancies()) {
 							if (occupancyType.equals(buildingOccupancy.getTypeHelper())) {
-								totalFloorAreaForAllBlks = totalFloorAreaForAllBlks.add(buildingOccupancy.getFloorArea());
+								totalFloorAreaForAllBlks = totalFloorAreaForAllBlks
+										.add(buildingOccupancy.getFloorArea());
 								totalBuiltUpAreaForAllBlks = totalBuiltUpAreaForAllBlks
 										.add(buildingOccupancy.getBuiltUpArea());
 								totalCarpetAreaForAllBlks = totalCarpetAreaForAllBlks
@@ -622,7 +562,7 @@ public class Far_AR extends Far {
 			pl.setOccupancies(occupanciesForPlan);
 			pl.getVirtualBuilding().setTotalFloorArea(totalFloorArea);
 			pl.getVirtualBuilding().setTotalCarpetArea(totalCarpetArea);
-			// pl.getVirtualBuilding().setTotalExistingBuiltUpArea(totalExistingBuiltUpArea);
+			pl.getVirtualBuilding().setTotalExistingBuiltUpArea(totalExistingBuiltUpArea);
 			pl.getVirtualBuilding().setTotalExistingFloorArea(totalExistingFloorArea);
 			pl.getVirtualBuilding().setTotalExistingCarpetArea(totalExistingCarpetArea);
 			pl.getVirtualBuilding().setOccupancyTypes(distinctOccupancyTypesHelper);
@@ -634,7 +574,7 @@ public class Far_AR extends Far {
 				for (OccupancyTypeHelper occupancy : distinctOccupancyTypesHelper) {
 					// setting residentialBuilding
 					int residentialOccupancyType = 0;
-					if (A.equals(occupancy.getType().getCode())) {
+					if (R.equals(occupancy.getType().getCode())) {
 						residentialOccupancyType = 1;
 					}
 					if (residentialOccupancyType == 0) {
@@ -648,7 +588,7 @@ public class Far_AR extends Far {
 				int allResidentialOrCommercialOccTypesForPlan = 0;
 				for (OccupancyTypeHelper occupancyType : distinctOccupancyTypesHelper) {
 					int residentialOrCommercialOccupancyTypeForPlan = 0;
-					if (A.equals(occupancyType.getType().getCode()) || F.equals(occupancyType.getType().getCode())) {
+					if (R.equals(occupancyType.getType().getCode()) || C.equals(occupancyType.getType().getCode())) {
 						residentialOrCommercialOccupancyTypeForPlan = 1;
 					}
 					if (residentialOrCommercialOccupancyTypeForPlan == 0) {
@@ -658,7 +598,8 @@ public class Far_AR extends Far {
 						allResidentialOrCommercialOccTypesForPlan = 1;
 					}
 				}
-				pl.getVirtualBuilding().setResidentialOrCommercialBuilding(allResidentialOrCommercialOccTypesForPlan == 1);
+				pl.getVirtualBuilding()
+						.setResidentialOrCommercialBuilding(allResidentialOrCommercialOccTypesForPlan == 1);
 			}
 			if (!pl.getVirtualBuilding().getResidentialOrCommercialBuilding()) {
 				pl.getErrors().put(DxfFileConstants.OCCUPANCY_ALLOWED_KEY, DxfFileConstants.OCCUPANCY_ALLOWED);
@@ -676,64 +617,32 @@ public class Far_AR extends Far {
 
 			pl.setTotalSurrenderRoadArea(surrenderRoadArea.setScale(DcrConstants.DECIMALDIGITS_MEASUREMENTS,
 					DcrConstants.ROUNDMODE_MEASUREMENTS));
-			BigDecimal plotArea = pl.getPlot() != null ? pl.getPlot().getArea().add(surrenderRoadArea) : BigDecimal.ZERO;
-//			BigDecimal plotArea = BigDecimal.valueOf(800).add(surrenderRoadArea); //hardcoded for testing
-//			BigDecimal fartestvalue = BigDecimal.valueOf(360000); //hardcoded for testing
-//			LOG.info("plotArea hardcoded::::"+plotArea);
-//			LOG.info("Floor Area from plan::::"+pl.getVirtualBuilding().getTotalFloorArea());
-//			LOG.info("Floor Area from fartestvalue harcoded::::"+fartestvalue);
-
+			BigDecimal plotArea = pl.getPlot() != null ? pl.getPlot().getArea().add(surrenderRoadArea)
+					: BigDecimal.ZERO;
 			if (plotArea.doubleValue() > 0)
 				providedFar = pl.getVirtualBuilding().getTotalFloorArea().divide(plotArea, DECIMALDIGITS_MEASUREMENTS,
 						ROUNDMODE_MEASUREMENTS); // Calculation for FAR
-//		providedFar = fartestvalue.divide(plotArea, DECIMALDIGITS_MEASUREMENTS,ROUNDMODE_MEASUREMENTS); // Calculation for FAR harcoded for testing
-			LOG.info("Provided Far Calculated::" + providedFar);
-
 			pl.setFarDetails(new FarDetails());
 			pl.getFarDetails().setProvidedFar(providedFar.doubleValue());
-			String typeOfArea = pl.getPlanInformation().getTypeOfArea();
-			// get area from plan
-//			BigDecimal PlotArea = pl.getPlanInformation().getPlotArea();
-			BigDecimal PlotArea = BigDecimal.valueOf(800);// harcoded for testing
-			LOG.info("PlotArea::::hardcoded2" + PlotArea);
-			BigDecimal roadWidth = pl.getPlanInformation().getRoadWidth();
-//			mostRestrictiveOccupancyType.getType().setCode(F); //hardcoded for testing
-//			mostRestrictiveOccupancyType.getType().setName("Commercial"); //hardcoded for testing
-//			LOG.info("OCCUPANCY::::hardcoded"+mostRestrictiveOccupancyType.getType().getCode());
-			// uncommented
-			if (mostRestrictiveOccupancyType != null && StringUtils.isNotBlank(typeOfArea) && roadWidth != null) {
+			BigDecimal PlotArea = pl.getPlot().getArea();
+			if (mostRestrictiveOccupancyType != null) {
 				if ((mostRestrictiveOccupancyType.getType() != null
-						&& DxfFileConstants.A.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode()))) {
-					// processFarResidential(pl, mostRestrictiveOccupancyType, providedFar,
-					// typeOfArea, roadWidth, errorMsgs);
+						&& R.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode()))) {
 					processFarResidential(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
 				}
 				if (mostRestrictiveOccupancyType.getType() != null
-						&& (ML_A.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())
-								|| (ML_F.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())))) {
-					processFarMixedLandUse(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
-
-				}
-//				if (mostRestrictiveOccupancyType.getType() != null
-//						&& DxfFileConstants.I.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
-//					processFarHaazardous(pl, mostRestrictiveOccupancyType, providedFar, typeOfArea, roadWidth, errorMsgs);
-//				}
-				if (mostRestrictiveOccupancyType.getType() != null
-						&& DxfFileConstants.F.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
-					// processFarNonResidential(pl, mostRestrictiveOccupancyType, providedFar,
-					// typeOfArea, roadWidth,
-					// errorMsgs);
+						&& C.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
 					processFarCommercial(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
 				}
 				if (mostRestrictiveOccupancyType.getType() != null
-						&& DxfFileConstants.G.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
+						&& I.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
 
 					processFarIndustrial(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
 				}
 				if (mostRestrictiveOccupancyType.getType() != null
-						&& P.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
+						&& G.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
 
-					processFarPublicSemiPublic(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
+					processFarGovernmentUse(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
 				}
 				if (mostRestrictiveOccupancyType.getType() != null
 						&& T.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
@@ -741,20 +650,11 @@ public class Far_AR extends Far {
 					processFarTransportation(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
 				}
 				if (mostRestrictiveOccupancyType.getType() != null
-						&& DxfFileConstants.C.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
+						&& P.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
 
-					processFarHealthServices(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
+					processFarPublicSemiPublic(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
 				}
-				if (mostRestrictiveOccupancyType.getType() != null
-						&& DxfFileConstants.B.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
 
-					processFarEducational(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
-				}
-				if (mostRestrictiveOccupancyType.getType() != null
-						&& DxfFileConstants_AR.U.equalsIgnoreCase(mostRestrictiveOccupancyType.getType().getCode())) {
-
-					processFarSecurityServices(pl, mostRestrictiveOccupancyType, providedFar, PlotArea, errorMsgs);
-				}
 			}
 
 			ProcessPrintHelper.print(pl);
@@ -763,39 +663,6 @@ public class Far_AR extends Far {
 		}
 		return pl;
 	}
-
-//	private void decideNocIsRequired(Plan pl) {
-//		Boolean isHighRise = false;
-//		for (Block b : pl.getBlocks()) {
-//			if ((b.getBuilding() != null/*
-//										 * && b.getBuilding().getIsHighRise() != null && b.getBuilding().getIsHighRise()
-//										 */ && b.getBuilding().getBuildingHeight().compareTo(new BigDecimal(5)) > 0)
-//					|| (b.getBuilding() != null && b.getBuilding().getCoverageArea() != null
-//							&& b.getBuilding().getCoverageArea().compareTo(new BigDecimal(500)) > 0)) {
-//				isHighRise = true;
-//
-//			}
-//		}
-//		if (isHighRise) {
-//			pl.getPlanInformation().setNocFireDept("YES");
-//		}
-//
-//		if (StringUtils.isNotBlank(pl.getPlanInformation().getBuildingNearMonument())
-//				&& "YES".equalsIgnoreCase(pl.getPlanInformation().getBuildingNearMonument())) {
-//			BigDecimal minDistanceFromMonument = BigDecimal.ZERO;
-//			List<BigDecimal> distancesFromMonument = pl.getDistanceToExternalEntity().getMonuments();
-//			if (!distancesFromMonument.isEmpty()) {
-//
-//				minDistanceFromMonument = distancesFromMonument.stream().reduce(BigDecimal::min).get();
-//
-//				if (minDistanceFromMonument.compareTo(BigDecimal.valueOf(300)) > 0) {
-//					pl.getPlanInformation().setNocNearMonument("YES");
-//				}
-//			}
-//
-//		}
-//
-//	}
 
 	private void validate2(Plan pl, Block blk, Floor flr, Occupancy occupancy) {
 		String occupancyTypeHelper = StringUtils.EMPTY;
@@ -835,95 +702,17 @@ public class Far_AR extends Far {
 		}
 	}
 
-	protected OccupancyTypeHelper getMostRestrictiveFar(Set<OccupancyTypeHelper> distinctOccupancyTypes) {
-		Set<String> codes = new HashSet<>();
-		Map<String, OccupancyTypeHelper> codesMap = new HashMap<>();
-		for (OccupancyTypeHelper typeHelper : distinctOccupancyTypes) {
-
-			if (typeHelper.getType() != null)
-				codesMap.put(typeHelper.getType().getCode(), typeHelper);
-			if (typeHelper.getSubtype() != null)
-				codesMap.put(typeHelper.getSubtype().getCode(), typeHelper);
-		}
-		codes = codesMap.keySet();
-		if (codes.contains(S_ECFG))
-			return codesMap.get(S_ECFG);
-		else if (codes.contains(A_FH))
-			return codesMap.get(A_FH);
-		else if (codes.contains(S_SAS))
-			return codesMap.get(S_SAS);
-		else if (codes.contains(D_B))
-			return codesMap.get(D_B);
-		else if (codes.contains(D_C))
-			return codesMap.get(D_C);
-		else if (codes.contains(D_A))
-			return codesMap.get(D_A);
-		else if (codes.contains(H_PP))
-			return codesMap.get(H_PP);
-		else if (codes.contains(E_NS))
-			return codesMap.get(E_NS);
-		else if (codes.contains(M_DFPAB))
-			return codesMap.get(M_DFPAB);
-		else if (codes.contains(E_PS))
-			return codesMap.get(E_PS);
-		else if (codes.contains(E_SFMC))
-			return codesMap.get(E_SFMC);
-		else if (codes.contains(E_SFDAP))
-			return codesMap.get(E_SFDAP);
-		else if (codes.contains(E_EARC))
-			return codesMap.get(E_EARC);
-		else if (codes.contains(S_MCH))
-			return codesMap.get(S_MCH);
-		else if (codes.contains(S_BH))
-			return codesMap.get(S_BH);
-		else if (codes.contains(S_CRC))
-			return codesMap.get(S_CRC);
-		else if (codes.contains(S_CA))
-			return codesMap.get(S_CA);
-		else if (codes.contains(S_SC))
-			return codesMap.get(S_SC);
-		else if (codes.contains(S_ICC))
-			return codesMap.get(S_ICC);
-		else if (codes.contains(A2))
-			return codesMap.get(A2);
-		else if (codes.contains(E_CLG))
-			return codesMap.get(E_CLG);
-		else if (codes.contains(M_OHF))
-			return codesMap.get(M_OHF);
-		else if (codes.contains(M_VH))
-			return codesMap.get(M_VH);
-		else if (codes.contains(M_NAPI))
-			return codesMap.get(M_NAPI);
-		else if (codes.contains(A_SA))
-			return codesMap.get(A_SA);
-		else if (codes.contains(M_HOTHC))
-			return codesMap.get(M_HOTHC);
-		else if (codes.contains(E_SACA))
-			return codesMap.get(E_SACA);
-		else if (codes.contains(F))
-			return codesMap.get(F);
-		else if (codes.contains(A))
-			return codesMap.get(A);
-		else if (codes.contains(A_RH))
-			return codesMap.get(A_RH);
-		else
-			return null;
-
-	}
-
-	// private void processFarResidential(Plan pl, OccupancyTypeHelper
-	// occupancyType, BigDecimal far, String typeOfArea,
 	private void processFarResidential(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far, BigDecimal PlotArea,
 			HashMap<String, String> errors) {
 		OccupancyTypeHelper mostRestrictiveOccupancyType = pl.getVirtualBuilding() != null
 				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
 				: null;
-		LOG.info("INSIDE RESIDENTAL OCCUPANCY::: MIKA");
 
 		String expectedResult = StringUtils.EMPTY;
 		boolean isAccepted = false;
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_R)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_AF)) {
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(R1a)
+				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(R1b)
+				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(R1c)) {
 			if (PlotArea.compareTo(PLOT_AREA_48) < 0) {
 				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
 				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
@@ -957,12 +746,19 @@ public class Far_AR extends Far {
 				pl.getFarDetails().setPermissableFar(TWO_TWENTYFIVE.doubleValue());
 				expectedResult = "<= 2.25";
 
+			}else if (PlotArea.compareTo(PLOT_AREA_3000) > 0) {
+				errors.put("PlotArea Above 3000 Residential","Plot area should not exceed above 3000 sqmts for plotted residential housing");
+				pl.addErrors(errors);
 			}
 
 		}
 
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_FH)) {
-			if (PlotArea.compareTo(PLOT_AREA_10000) >= 0 && PlotArea.compareTo(PLOT_AREA_20000) < 0) {
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(R2a)) {
+			if(PlotArea.compareTo(PLOT_AREA_10000)<0) {
+				errors.put("PlotArea below 10000 R2a","Plot area below 10000 sqmts not allowed for Farm House");
+				pl.addErrors(errors);
+			}
+			else if (PlotArea.compareTo(PLOT_AREA_10000) >= 0 && PlotArea.compareTo(PLOT_AREA_20000) < 0) {
 				isAccepted = far.compareTo(ONE) <= 0;
 				pl.getFarDetails().setPermissableFar(ONE.doubleValue());
 				expectedResult = "<= 1";
@@ -976,33 +772,57 @@ public class Far_AR extends Far {
 
 		}
 
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_HE)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(A_BH)) {
-			if (PlotArea.compareTo(PLOT_AREA_500) <= 0) {
-				isAccepted = far.compareTo(ONE_POINTFIVEFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTFIVEFIVE.doubleValue());
-				expectedResult = "<= 1.55";
-			} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) < 0) {
-				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-				expectedResult = "<= 1.5";
-			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_2000) < 0) {
-				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-				expectedResult = "<= 1.5";
-			} else if (PlotArea.compareTo(PLOT_AREA_2000) > 0) {
-				isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-				expectedResult = "<= 1.2";
-			}
-
-		}
 		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
 			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
 		}
 
+	}
+
+	private void processFarGovernmentUse(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far,
+			BigDecimal PlotArea, HashMap<String, String> errors) {
+		OccupancyTypeHelper mostRestrictiveOccupancyType = pl.getVirtualBuilding() != null
+				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
+				: null;
+
+		String expectedResult = StringUtils.EMPTY;
+		boolean isAccepted = false;
+		// General/Govt./ Integrated Office Complex
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G2a)) {
+			isAccepted = far.compareTo(TWO) <= 0;
+			pl.getFarDetails().setPermissableFar(TWO.doubleValue());
+			expectedResult = "<= 2.00";
+
+		}
+		// District Court
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G1a)) {
+			isAccepted = far.compareTo(TWO) <= 0;
+			pl.getFarDetails().setPermissableFar(TWO.doubleValue());
+			expectedResult = "<= 2.00";
+
+		}
+		// Police Post
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G3a)) {
+			isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
+			pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
+			expectedResult = "<= 1.2";
+		}
+		// Police Station
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G3b)) {
+			isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
+			pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
+			expectedResult = "<= 1.2";
+		}
+		// Other safety departments,Disaster manangement center, Fire Station etc.
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G3c)) {
+			isAccepted = far.compareTo(ONE_POINTTWO) < 0;
+			pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
+			expectedResult = "<= 1.2";
+
+		}
+
+		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
+			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
+		}
 	}
 
 	private void processFarPublicSemiPublic(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far,
@@ -1013,218 +833,129 @@ public class Far_AR extends Far {
 
 		String expectedResult = StringUtils.EMPTY;
 		boolean isAccepted = false;
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_O)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_I)) {
-			isAccepted = far.compareTo(TWO) <= 0;
-			pl.getFarDetails().setPermissableFar(TWO.doubleValue());
-			expectedResult = "<= 2";
 
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_D)) {
-			isAccepted = far.compareTo(TWO) <= 0;
-			pl.getFarDetails().setPermissableFar(TWO.doubleValue());
-			expectedResult = "<= 2";
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_H)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_A)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_B)) {
+		// Meeting Hall, Auditorium, Community Center
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P3a)
+				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(P3b)) {
 			isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
 			pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
 			expectedResult = "<= 1.2";
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P_C)) {
-			isAccepted = far.compareTo(ONE_POINTTWO) < 0;
-			pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-			expectedResult = "<= 1.2";
 
 		}
+		
+		//Hostel
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P3c)) {
+			if(PlotArea.compareTo(PLOT_AREA_100)<0) {
+				errors.put("PlotArea below 100 Hostel","Plot area below 100 sqmts not allowed for hostel");
+				pl.addErrors(errors);
+			}
+			else if (PlotArea.compareTo(PLOT_AREA_100) > 0 && PlotArea.compareTo(PLOT_AREA_250) <= 0) {
+				isAccepted = far.compareTo(POINTEIGHT) <= 0;
+				pl.getFarDetails().setPermissableFar(POINTEIGHT.doubleValue());
+				expectedResult = "<= 1.8";
+			} else if (PlotArea.compareTo(PLOT_AREA_250) > 0 && PlotArea.compareTo(PLOT_AREA_500) <= 0) {
+				isAccepted = far.compareTo(TWO) <= 0;
+				pl.getFarDetails().setPermissableFar(TWO.doubleValue());
+				expectedResult = "<= 2.0";
 
-		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
-			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
+			} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) <= 0) {
+				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
+				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
+				expectedResult = "<= 2.5";
+			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_1500) <= 0) {
+				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
+				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
+				expectedResult = "<= 2.5";
+			} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0 && PlotArea.compareTo(PLOT_AREA_3000) <= 0) {
+				isAccepted = far.compareTo(TWO_POINTTWOFIVE) <= 0;
+				pl.getFarDetails().setPermissableFar(TWO_POINTTWOFIVE.doubleValue());
+				expectedResult = "<= 2.25";
+			}else if(PlotArea.compareTo(PLOT_AREA_3000)>0) {
+				errors.put("PlotArea Above 3000 hostel","Plot area should not exceed above 3000 sqmts for hostel");
+				pl.addErrors(errors);
+			}
+
 		}
-	}
-
-	private void processFarHealthServices(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far,
-			BigDecimal PlotArea, HashMap<String, String> errors) {
-		OccupancyTypeHelper mostRestrictiveOccupancyType = pl.getVirtualBuilding() != null
-				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
-				: null;
-
-		String expectedResult = StringUtils.EMPTY;
-		boolean isAccepted = false;
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_H)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_T)) {
+		// Hospital
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P2a)) {
 			isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
 			pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
 			expectedResult = "<= 2.5";
 
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_NH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_PC)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_D)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_DC)) {
-			isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-			pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-			expectedResult = "<= 1.5";
 
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_VH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_VD)) {
+		// Nursing Center
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P2b)) {
 			isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
 			pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
 			expectedResult = "<= 1.5";
 		}
 
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C_NAPI)) {
+		// Veterinary
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P2c)) {
+			isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
+			pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
+			expectedResult = "<= 1.5";
+		}
+
+		// Medical College, Nursing and paramedic Institute
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P2d)) {
 			isAccepted = far.compareTo(ONE) < 0;
 			pl.getFarDetails().setPermissableFar(ONE.doubleValue());
 			expectedResult = "<= 1.0";
-
 		}
 
-		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
-			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
-		}
-
-	}
-
-	private void processFarEducational(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far, BigDecimal PlotArea,
-			HashMap<String, String> errors) {
-		OccupancyTypeHelper mostRestrictiveOccupancyType = pl.getVirtualBuilding() != null
-				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
-				: null;
-
-		String expectedResult = StringUtils.EMPTY;
-		boolean isAccepted = false;
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_NS)) {
-
-			isAccepted = far.compareTo(POINTEIGHT) <= 0;
+		// Nursery School
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1b)) {
+			isAccepted = far.compareTo(POINTEIGHT) < 0;
 			pl.getFarDetails().setPermissableFar(POINTEIGHT.doubleValue());
-			expectedResult = "<= .8";
+			expectedResult = "<= 0.8";
 
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_PS)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_UPS)) {
+
+		// Primary School
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1c)) {
 			isAccepted = far.compareTo(ONE_POINTSIX) <= 0;
 			pl.getFarDetails().setPermissableFar(ONE_POINTSIX.doubleValue());
-			expectedResult = "<= 1.60";
-
+			expectedResult = "<= 1.6";
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_HSS)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_SS)) {
+
+		// High / Higher Secondary
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1d)) {
 			isAccepted = far.compareTo(ONE_POINTSIX) <= 0;
 			pl.getFarDetails().setPermissableFar(ONE_POINTSIX.doubleValue());
-			expectedResult = "<= 1.60";
-
+			expectedResult = "<= 1.6";
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_C)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_U)) {
-			isAccepted = far.compareTo(POINTONEFIVE) <= 0;
+
+		// College
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1e)) {
+			isAccepted = far.compareTo(ONE_POINTSEVENFIVE) <= 0;
 			pl.getFarDetails().setPermissableFar(ONE_POINTSEVENFIVE.doubleValue());
 			expectedResult = "<= 1.75";
 		}
 
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_SFMC)) {
-			isAccepted = far.compareTo(ONE_POINTFIVE) < 0;
+		// Special School
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1g)) {
+			isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
 			pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-			expectedResult = "<= 1.50";
-
+			expectedResult = "<= 1.5";
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_ERIC)) {
 
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(B_ERIC_AC)
-					|| mostRestrictiveOccupancyType.getUsage().getCode().equals(B_ERIC_AR)) {
-				if (PlotArea.compareTo(BigDecimal.valueOf(0.45).multiply(PlotArea)) >= 0) {
-					isAccepted = far.compareTo(ONE_POINTTWO) < 0;
-					pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-					expectedResult = "<= 1.20";
-				}
-			} else if (mostRestrictiveOccupancyType.getUsage().getCode().equals(B_ERIC_SCC)) {
-				if (PlotArea.compareTo(BigDecimal.valueOf(0.15).multiply(PlotArea)) >= 0) {
-					isAccepted = far.compareTo(POINTONEFIVE) < 0;
-					pl.getFarDetails().setPermissableFar(POINTONEFIVE.doubleValue());
-					expectedResult = "<= .15";
-				}
-			} else if (mostRestrictiveOccupancyType.getUsage().getCode().equals(B_ERIC_POS)) {
-				if (PlotArea.compareTo(BigDecimal.valueOf(0.15).multiply(PlotArea)) >= 0) {
-					isAccepted = far.compareTo(POINTONEFIVE) < 0;
-					pl.getFarDetails().setPermissableFar(POINTONEFIVE.doubleValue());
-					expectedResult = "<= .15";
-				}
-			}
-
+		// Edu & Research Centre
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1f)) {
+			isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
+			pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
+			expectedResult = "<= 1.2";
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(B_SP)) {
-			isAccepted = far.compareTo(POINT_FOUR) < 0;
+
+		// Sports
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(P1a)) {
+			isAccepted = far.compareTo(POINT_FOUR) <= 0;
 			pl.getFarDetails().setPermissableFar(POINT_FOUR.doubleValue());
-			expectedResult = "<= .40";
-
+			expectedResult = "<= 0.4";
 		}
 
 		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
-			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
-		}
-
-	}
-
-	private void processFarSecurityServices(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far,
-			BigDecimal PlotArea, HashMap<String, String> errors) {
-		OccupancyTypeHelper mostRestrictiveOccupancyType = pl.getVirtualBuilding() != null
-				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
-				: null;
-
-		String expectedResult = StringUtils.EMPTY;
-		boolean isAccepted = false;
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_PP)) {
-			isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
-			pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-			expectedResult = "<= 1.20";
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_PS)) {
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(U_PS_DOB)) {
-				isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-				expectedResult = "<= 1.20";
-			}
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(U_PS_DJ)) {
-				isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-				expectedResult = "<= 1.20";
-			}
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(U_PS_PTI)) {
-				isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-				expectedResult = "<= 1.20";
-			}
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_DMC)) {
-			isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
-			pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-			expectedResult = "<= 1.20";
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_FP)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_FS)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_FTI)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(U_FTC)) {
-			isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
-			pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-			expectedResult = "<= 1.20";
-		}
-
-		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
 			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
 		}
 
@@ -1236,39 +967,61 @@ public class Far_AR extends Far {
 		OccupancyTypeHelper mostRestrictiveOccupancyType = pl.getVirtualBuilding() != null
 				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
 				: null;
-//				mostRestrictiveOccupancyType.getSubtype().setCode(F_SM); //hardcoded for testing
-//				mostRestrictiveOccupancyType.getSubtype().setName("Shopping Mall"); //hardcoded for testing
-//				LOG.info("SUBOCCUPANCY code::::hardcoded "+mostRestrictiveOccupancyType.getSubtype().getCode());
-//				LOG.info("SUBOCCUPANCY name::::hardcoded"+mostRestrictiveOccupancyType.getSubtype().getName());
 		String expectedResult = StringUtils.EMPTY;
 		boolean isAccepted = false;
 		// Restaurants/shops
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_RT)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_SH)|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_CB)) {
-			if (PlotArea.compareTo(PLOT_AREA_48) >= 0 && PlotArea.compareTo(PLOT_AREA_100) < 0) {
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C1a)
+				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(C1b)) {
+			if(PlotArea.compareTo(PLOT_AREA_48)<0) {
+				errors.put("PlotArea below 48 commmercial","Plot area below 48 sqmts not allowed for Shops/Restaurant");
+				pl.addErrors(errors);
+			}
+			else if (PlotArea.compareTo(PLOT_AREA_48) >= 0 && PlotArea.compareTo(PLOT_AREA_100) <= 0) {
 				isAccepted = far.compareTo(ONE_POINTSIX) <= 0;
 				pl.getFarDetails().setPermissableFar(ONE_POINTSIX.doubleValue());
 				expectedResult = "<= 1.60";
-			} else if (PlotArea.compareTo(PLOT_AREA_100) > 0) {
+			} else if (PlotArea.compareTo(PLOT_AREA_100) > 0 && PlotArea.compareTo(PLOT_AREA_250) <= 0) {
 				isAccepted = far.compareTo(ONE_POINTEIGHT) <= 0;
 				pl.getFarDetails().setPermissableFar(ONE_POINTEIGHT.doubleValue());
 				expectedResult = "<= 1.80";
+			} else if (PlotArea.compareTo(PLOT_AREA_250) > 0 && PlotArea.compareTo(PLOT_AREA_500) <= 0) {
+				isAccepted = far.compareTo(TWO) <= 0;
+				pl.getFarDetails().setPermissableFar(TWO.doubleValue());
+				expectedResult = "<= 2.00";
+			} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) <= 0) {
+				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
+				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
+				expectedResult = "<= 2.50";
+			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_1500) <= 0) {
+				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
+				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
+				expectedResult = "<= 2.50";
+			} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0 && PlotArea.compareTo(PLOT_AREA_3000) <= 0) {
+				isAccepted = far.compareTo(TWO_POINTTWOFIVE) <= 0;
+				pl.getFarDetails().setPermissableFar(TWO_POINTTWOFIVE.doubleValue());
+				expectedResult = "<= 2.25";
+			}else if(PlotArea.compareTo(PLOT_AREA_3000)>0) {
+				errors.put("PlotArea Above 3000 Commercial","Plot area should not exceed above 3000 sqmts for Restaurant/Shops");
+				pl.addErrors(errors);
 			}
 
 		}
+
 		// Hotel
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_H)) {
-			LOG.info("inside hotel:::plot area" + PlotArea);
-			if (PlotArea.compareTo(PLOT_AREA_500) < 0) {
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C2a)) {
+			if(PlotArea.compareTo(PLOT_AREA_250)<0){
+				errors.put("PlotArea below 250 Hotel","Plot area below 250 sqmts not allowed for hotel");
+				pl.addErrors(errors);
+			}
+			else if (PlotArea.compareTo(PLOT_AREA_250) >= 0 && PlotArea.compareTo(PLOT_AREA_500) <= 0) {
 				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
 				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
 				expectedResult = "<= 2.50";
-			} else if (PlotArea.compareTo(PLOT_AREA_500) >= 0 && PlotArea.compareTo(PLOT_AREA_1000) < 0) {
-				LOG.info("inside hotel 2:::plot area" + PlotArea);
+			} else if (PlotArea.compareTo(PLOT_AREA_500) >= 0 && PlotArea.compareTo(PLOT_AREA_1000) <= 0) {
 				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
 				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
 				expectedResult = "<= 2.50";
-			} else if (PlotArea.compareTo(PLOT_AREA_1000) >= 0 && PlotArea.compareTo(PLOT_AREA_1500) < 0) {
+			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_1500) <= 0) {
 				isAccepted = far.compareTo(THREE) <= 0;
 				pl.getFarDetails().setPermissableFar(THREE.doubleValue());
 				expectedResult = "<= 3.0";
@@ -1280,50 +1033,47 @@ public class Far_AR extends Far {
 			}
 
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_M)) {
-
+		// Motel
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C3a)) {
 			isAccepted = far.compareTo(TWO) <= 0;
 			pl.getFarDetails().setPermissableFar(TWO.doubleValue());
 			expectedResult = "<= 2.0";
 
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_R)) {
-
-			isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-			pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-			expectedResult = "<= 1.5";
-
+		// Resort
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C4a)) {
+				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
+				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
+				expectedResult = "<= 1.5";
 		}
+		// Petrol Pump
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(C5a)) {
+			if (PlotArea.compareTo(PLOT_AREA_1080) > 0) {
+				isAccepted = far.compareTo(POINTTWO) <= 0;
+				pl.getFarDetails().setPermissableFar(POINTTWO.doubleValue());
+				expectedResult = "<= 0.20";
 
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_PTP)) {
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(F_PTP_FCSS)) {
-				if (PlotArea.compareTo(PLOT_AREA_1080) > 0) {
-					isAccepted = far.compareTo(POINTTWO) < 0;
-					pl.getFarDetails().setPermissableFar(POINTTWO.doubleValue());
-					expectedResult = "<= .20";
-				}
-			}
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(F_PTP_FS)) {
-				if (PlotArea.compareTo(PLOT_AREA_510) > 0) {
-					isAccepted = far.compareTo(POINTONE) <= 0;
-					pl.getFarDetails().setPermissableFar(POINTONE.doubleValue());
-					expectedResult = "<= .10";
+			} else if (PlotArea.compareTo(PLOT_AREA_510) > 0) {
+				isAccepted = far.compareTo(POINTONE) <= 0;
+				pl.getFarDetails().setPermissableFar(POINTONE.doubleValue());
+				expectedResult = "<= 0.10";
 
-				}
+			}else {
+				errors.put("PlotArea below 510 Petrol","Plot area below 510 sqmts not allowed for Petrol Pump");
+				pl.addErrors(errors);
 			}
 
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_WH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(F_WST)) {
+		// Wholesale
+		if (mostRestrictiveOccupancyType.getUsage().getCode().equals(C6a)) {
 
-			isAccepted = far.compareTo(POINTEIGHT) <= 0;
-			pl.getFarDetails().setPermissableFar(POINTEIGHT.doubleValue());
-			expectedResult = "<= .80";
+			isAccepted = far.compareTo(EIGHT) <= 0;
+			pl.getFarDetails().setPermissableFar(EIGHT.doubleValue());
+			expectedResult = "<= 8.00";
 
 		}
+
 		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
 			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
 		}
 
@@ -1338,9 +1088,13 @@ public class Far_AR extends Far {
 
 		String expectedResult = StringUtils.EMPTY;
 		boolean isAccepted = false;
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G_SC)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(G_FI)) {
-			if (PlotArea.compareTo(PLOT_AREA_2000) >= 0) {
+		// Flatted
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(I1a)) {
+			if(PlotArea.compareTo(PLOT_AREA_2000)<0) {
+				errors.put("PlotArea below 2000 Flatted","Plot area below 2000 sqmts not allowed for Flatted Industries");
+				pl.addErrors(errors);
+			}
+			else if (PlotArea.compareTo(PLOT_AREA_2000) >= 0) {
 				isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
 				pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
 				expectedResult = "<= 1.20";
@@ -1348,38 +1102,39 @@ public class Far_AR extends Far {
 
 		}
 
+		// Light and Service
 		// check for plains and hills
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(G_LSI)) {
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(I1b)) {
 			if ((pl.getPlanInfoProperties().get("TERRAIN")).equals("PLAINS")) {
-				if (PlotArea.compareTo(PLOT_AREA_400) <0 ) {
+				if (PlotArea.compareTo(PLOT_AREA_400) <= 0 ) {
 					isAccepted = far.compareTo(ONE_POINTTWOFIVE) <= 0;
 					pl.getFarDetails().setPermissableFar(ONE_POINTTWOFIVE.doubleValue());
 					expectedResult = "<= 1.25";
-				}else
+				}
 				if (PlotArea.compareTo(PLOT_AREA_400) > 0 && PlotArea.compareTo(PLOT_AREA_4000) <= 0) {
 					isAccepted = far.compareTo(ONE_POINTTWOFIVE) <= 0;
 					pl.getFarDetails().setPermissableFar(ONE_POINTTWOFIVE.doubleValue());
 					expectedResult = "<= 1.25";
-				} else if (PlotArea.compareTo(PLOT_AREA_4000) > 0 && PlotArea.compareTo(PLOT_AREA_12000) <= 0) { 
+				} else if (PlotArea.compareTo(PLOT_AREA_4000) > 0 && PlotArea.compareTo(PLOT_AREA_12000) <= 0) {
 					isAccepted = far.compareTo(ONE_POINTTWOFIVE) <= 0;
 					pl.getFarDetails().setPermissableFar(ONE_POINTTWOFIVE.doubleValue());
 					expectedResult = "<= 1.25";
 				} else if (PlotArea.compareTo(PLOT_AREA_12000) > 0) {
-					isAccepted = far.compareTo(ONE) <= 0;
-					pl.getFarDetails().setPermissableFar(ONE.doubleValue());
+					isAccepted = far.compareTo(POINTONE) <= 0;
+					pl.getFarDetails().setPermissableFar(POINTONE.doubleValue());
 					expectedResult = "<= 1.00";
-				} 
+				}
 			} else if ((pl.getPlanInfoProperties().get("TERRAIN")).equals("HILLS")) {
-				if (PlotArea.compareTo(PLOT_AREA_400) <0 ) {
+				if (PlotArea.compareTo(PLOT_AREA_400) <= 0 ) {
 					isAccepted = far.compareTo(ONE) <= 0;
 					pl.getFarDetails().setPermissableFar(ONE.doubleValue());
 					expectedResult = "<= 1.00";
-				}else
-				if (PlotArea.compareTo(PLOT_AREA_400) > 0 && PlotArea.compareTo(PLOT_AREA_4000) <= 0) {
+				}
+				if (PlotArea.compareTo(PLOT_AREA_400) > 0  && PlotArea.compareTo(PLOT_AREA_4000) <= 0) {
 					isAccepted = far.compareTo(ONE) <= 0;
 					pl.getFarDetails().setPermissableFar(ONE.doubleValue());
 					expectedResult = "<= 1.00";
-				} else if (PlotArea.compareTo(PLOT_AREA_4000) > 0 && PlotArea.compareTo(PLOT_AREA_12000) <= 0) { 
+				} else if (PlotArea.compareTo(PLOT_AREA_4000) > 0 && PlotArea.compareTo(PLOT_AREA_12000) <= 0) {
 					isAccepted = far.compareTo(ONE) <= 0;
 					pl.getFarDetails().setPermissableFar(ONE.doubleValue());
 					expectedResult = "<= 1.00";
@@ -1387,23 +1142,16 @@ public class Far_AR extends Far {
 					isAccepted = far.compareTo(POINTSEVENFIVE) <= 0;
 					pl.getFarDetails().setPermissableFar(POINTSEVENFIVE.doubleValue());
 					expectedResult = "<= 0.75";
-				} 
+				}
 			} else {
 				pl.addError("TERRAIN TYPE", "Terrain Type should be PLAINS/HILLS");
 			}
 		}
 
 		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
 			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
 		}
 
-		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
-			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
-		}
 	}
 
 	private void processFarTransportation(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far,
@@ -1415,14 +1163,16 @@ public class Far_AR extends Far {
 
 		String expectedResult = StringUtils.EMPTY;
 		boolean isAccepted = false;
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T_R)) {
+		// Rail Terminal
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T1b)) {
 			isAccepted = far.compareTo(ONE) <= 0;
 			pl.getFarDetails().setPermissableFar(ONE.doubleValue());
 			expectedResult = "<= 1.0";
 
 		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T_I)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(T_B)) {
+		// ISBT Bus Terminal
+		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(T1a)
+				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(T1c)) {
 			isAccepted = far.compareTo(ONE) <= 0;
 			pl.getFarDetails().setPermissableFar(ONE.doubleValue());
 			expectedResult = "<= 1.0";
@@ -1430,267 +1180,11 @@ public class Far_AR extends Far {
 		}
 
 		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
 			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
 		}
 
 	}
 
-	private void processFarMixedLandUse(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far, BigDecimal PlotArea,
-			HashMap<String, String> errors) {
-
-		OccupancyTypeHelper mostRestrictiveOccupancyType = pl.getVirtualBuilding() != null
-				? pl.getVirtualBuilding().getMostRestrictiveFarHelper()
-				: null;
-//				mostRestrictiveOccupancyType.getSubtype().setCode(F_SM); //hardcoded for testing
-//				mostRestrictiveOccupancyType.getSubtype().setName("Shopping Mall"); //hardcoded for testing
-//				LOG.info("SUBOCCUPANCY code::::hardcoded "+mostRestrictiveOccupancyType.getSubtype().getCode());
-//				LOG.info("SUBOCCUPANCY name::::hardcoded"+mostRestrictiveOccupancyType.getSubtype().getName());
-		String expectedResult = StringUtils.EMPTY;
-		boolean isAccepted = false;
-
-		// Mixed Land Use commercial
-		// Restaurants/shops
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_F_RT)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_F_SH)) {
-			if (PlotArea.compareTo(PLOT_AREA_48) >= 0 && PlotArea.compareTo(PLOT_AREA_100) < 0) {
-				isAccepted = far.compareTo(ONE_POINTSIX) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTSIX.doubleValue());
-				expectedResult = "<= 1.60";
-			} else if (PlotArea.compareTo(PLOT_AREA_100) > 0) {
-				isAccepted = far.compareTo(ONE_POINTSIX) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTSIX.doubleValue());
-				expectedResult = "<= 1.60";
-			}
-
-		}
-		// Hotel
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_F_H)) {
-			LOG.info("inside hotel:::plot area" + PlotArea);
-			if (PlotArea.compareTo(PLOT_AREA_500) < 0) {
-				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
-				expectedResult = "<= 2.50";
-			} else if (PlotArea.compareTo(PLOT_AREA_500) >= 0 && PlotArea.compareTo(PLOT_AREA_1000) < 0) {
-				LOG.info("inside hotel 2:::plot area" + PlotArea);
-				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
-				expectedResult = "<= 2.50";
-			} else if (PlotArea.compareTo(PLOT_AREA_1000) >= 0 && PlotArea.compareTo(PLOT_AREA_1500) < 0) {
-				isAccepted = far.compareTo(THREE) <= 0;
-				pl.getFarDetails().setPermissableFar(THREE.doubleValue());
-				expectedResult = "<= 3.0";
-			} else if (PlotArea.compareTo(PLOT_AREA_1500) > 0) {
-				isAccepted = far.compareTo(THREE) <= 0;
-				pl.getFarDetails().setPermissableFar(THREE.doubleValue());
-				expectedResult = "<= 3.0";
-
-			}
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_F_M)) {
-
-			isAccepted = far.compareTo(TWO) <= 0;
-			pl.getFarDetails().setPermissableFar(TWO.doubleValue());
-			expectedResult = "<= 2.0";
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_F_R)) {
-
-			isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-			pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-			expectedResult = "<= 1.5";
-
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_F_PTP)) {
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(ML_F_PTP_FCSS)) {
-				if (PlotArea.compareTo(PLOT_AREA_1080) > 0) {
-					isAccepted = far.compareTo(POINTTWO) < 0;
-					pl.getFarDetails().setPermissableFar(POINTTWO.doubleValue());
-					expectedResult = "<= .20";
-				}
-			}
-			if (mostRestrictiveOccupancyType.getUsage().getCode().equals(ML_F_PTP_FS)) {
-				if (PlotArea.compareTo(PLOT_AREA_510) > 0) {
-					isAccepted = far.compareTo(POINTONE) <= 0;
-					pl.getFarDetails().setPermissableFar(POINTONE.doubleValue());
-					expectedResult = "<= .10";
-
-				}
-			}
-
-		}
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_F_WH)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_F_WST)) {
-
-			isAccepted = far.compareTo(POINTEIGHT) <= 0;
-			pl.getFarDetails().setPermissableFar(POINTEIGHT.doubleValue());
-			expectedResult = "<= .80";
-
-		}
-
-		// Mixed Land Use residential
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_A_R)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_A_AF)) {
-			if (PlotArea.compareTo(PLOT_AREA_48) < 0) {
-				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-				expectedResult = "<= 1.5";
-			} else if (PlotArea.compareTo(PLOT_AREA_48) >= 0 && PlotArea.compareTo(PLOT_AREA_60) < 0) {
-				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-				expectedResult = "<= 1.5";
-			} else if (PlotArea.compareTo(PLOT_AREA_60) >= 0 && PlotArea.compareTo(PLOT_AREA_100) < 0) {
-				isAccepted = far.compareTo(ONE_POINTEIGHT) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTEIGHT.doubleValue());
-				expectedResult = "<= 1.8";
-			} else if (PlotArea.compareTo(PLOT_AREA_100) >= 0 && PlotArea.compareTo(PLOT_AREA_250) < 0) {
-				isAccepted = far.compareTo(ONE_POINTEIGHT) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTEIGHT.doubleValue());
-				expectedResult = "<= 1.8";
-			} else if (PlotArea.compareTo(PLOT_AREA_250) >= 0 && PlotArea.compareTo(PLOT_AREA_500) < 0) {
-				isAccepted = far.compareTo(TWO) <= 0;
-				pl.getFarDetails().setPermissableFar(TWO.doubleValue());
-				expectedResult = "<= 2.0";
-			} else if (PlotArea.compareTo(PLOT_AREA_500) >= 0 && PlotArea.compareTo(PLOT_AREA_1000) < 0) {
-				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
-				expectedResult = "<= 2.5";
-			} else if (PlotArea.compareTo(PLOT_AREA_1000) >= 0 && PlotArea.compareTo(PLOT_AREA_1500) < 0) {
-				isAccepted = far.compareTo(TWO_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(TWO_POINTFIVE.doubleValue());
-				expectedResult = "<= 2.5";
-			} else if (PlotArea.compareTo(PLOT_AREA_1500) >= 0 && PlotArea.compareTo(PLOT_AREA_3000) < 0) {
-				isAccepted = far.compareTo(TWO_TWENTYFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(TWO_TWENTYFIVE.doubleValue());
-				expectedResult = "<= 2.25";
-
-			}
-
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_A_FH)) {
-			if (PlotArea.compareTo(PLOT_AREA_10000) >= 0 && PlotArea.compareTo(PLOT_AREA_20000) < 0) {
-				isAccepted = far.compareTo(ONE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE.doubleValue());
-				expectedResult = "<= 1";
-
-			} else if (PlotArea.compareTo(PLOT_AREA_20000) >= 0) {
-				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-				expectedResult = "<= 1.5";
-
-			}
-
-		}
-
-		if (mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_A_HE)
-				|| mostRestrictiveOccupancyType.getSubtype().getCode().equals(ML_A_BH)) {
-			if (PlotArea.compareTo(PLOT_AREA_500) <= 0) {
-				isAccepted = far.compareTo(ONE_POINTFIVEFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTFIVEFIVE.doubleValue());
-				expectedResult = "<= 1.55";
-			} else if (PlotArea.compareTo(PLOT_AREA_500) > 0 && PlotArea.compareTo(PLOT_AREA_1000) < 0) {
-				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-				expectedResult = "<= 1.5";
-			} else if (PlotArea.compareTo(PLOT_AREA_1000) > 0 && PlotArea.compareTo(PLOT_AREA_2000) < 0) {
-				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-				expectedResult = "<= 1.5";
-			} else if (PlotArea.compareTo(PLOT_AREA_2000) > 0) {
-				isAccepted = far.compareTo(ONE_POINTTWO) <= 0;
-				pl.getFarDetails().setPermissableFar(ONE_POINTTWO.doubleValue());
-				expectedResult = "<= 1.2";
-			}
-
-		}
-
-		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-			// isAccepted);
-			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
-		}
-	}
-
-//	private void processFarForGBDOccupancy(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far,
-//			String typeOfArea, BigDecimal roadWidth, HashMap<String, String> errors) {
-//
-//		String expectedResult = StringUtils.EMPTY;
-//		boolean isAccepted = false;
-//
-//		if (typeOfArea.equalsIgnoreCase(OLD)) {
-//			if (roadWidth.compareTo(ROAD_WIDTH_TWO_POINTFOUR) < 0) {
-//				errors.put(OLD_AREA_ERROR, OLD_AREA_ERROR_MSG);
-//				pl.addErrors(errors);
-//			} else {
-//				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-//				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-//				expectedResult = "<=" + ONE_POINTFIVE;
-//			}
-//
-//		}
-//
-//		if (typeOfArea.equalsIgnoreCase(NEW)) {
-//			if (roadWidth.compareTo(ROAD_WIDTH_SIX_POINTONE) < 0) {
-//				errors.put(NEW_AREA_ERROR, NEW_AREA_ERROR_MSG);
-//				pl.addErrors(errors);
-//			} else {
-//				isAccepted = far.compareTo(ONE_POINTFIVE) <= 0;
-//				pl.getFarDetails().setPermissableFar(ONE_POINTFIVE.doubleValue());
-//				expectedResult = "<=" + ONE_POINTFIVE;
-//			}
-//
-//		}
-//
-//		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-//			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-//			// isAccepted);
-//			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
-//		}
-//	}
-
-//	private void processFarHaazardous(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far, String typeOfArea,
-//			BigDecimal roadWidth, HashMap<String, String> errors) {
-//
-//		String expectedResult = StringUtils.EMPTY;
-//		boolean isAccepted = false;
-//
-//		if (typeOfArea.equalsIgnoreCase(OLD)) {
-//			if (roadWidth.compareTo(ROAD_WIDTH_TWO_POINTFOUR) < 0) {
-//				errors.put(OLD_AREA_ERROR, OLD_AREA_ERROR_MSG);
-//				pl.addErrors(errors);
-//			} else {
-//				isAccepted = far.compareTo(POINTFIVE) <= 0;
-//				pl.getFarDetails().setPermissableFar(POINTFIVE.doubleValue());
-//				expectedResult = "<=" + POINTFIVE;
-//			}
-//
-//		}
-//
-//		if (typeOfArea.equalsIgnoreCase(NEW)) {
-//			if (roadWidth.compareTo(ROAD_WIDTH_SIX_POINTONE) < 0) {
-//				errors.put(NEW_AREA_ERROR, NEW_AREA_ERROR_MSG);
-//				pl.addErrors(errors);
-//			} else {
-//				isAccepted = far.compareTo(POINTFIVE) <= 0;
-//				pl.getFarDetails().setPermissableFar(POINTFIVE.doubleValue());
-//				expectedResult = "<=" + POINTFIVE;
-//			}
-//
-//		}
-//
-//		if (errors.isEmpty() && StringUtils.isNotBlank(expectedResult)) {
-//			// buildResult(pl, occupancyType, far, typeOfArea, roadWidth, expectedResult,
-//			// isAccepted);
-//			buildResult(pl, occupancyType, far, expectedResult, isAccepted);
-//		}
-//	}
-
-	// private void buildResult(Plan pl, OccupancyTypeHelper occupancyType,
-	// BigDecimal far, String typeOfArea,
 	private void buildResult(Plan pl, OccupancyTypeHelper occupancyType, BigDecimal far, String expectedResult,
 			boolean isAccepted) {
 		ScrutinyDetail scrutinyDetail = new ScrutinyDetail();
@@ -1702,7 +1196,6 @@ public class Far_AR extends Far {
 		scrutinyDetail.addColumnHeading(6, PROVIDED);
 		scrutinyDetail.addColumnHeading(7, STATUS);
 		scrutinyDetail.setKey("Common_FAR");
-//LOG.info("INSIDE buildResult");
 		String actualResult = far.toString();
 		String occupancyName;
 		if (occupancyType.getSubtype() != null)
@@ -1733,6 +1226,106 @@ public class Far_AR extends Far {
 		scrutinyDetail.addColumnHeading(6, STATUS);
 		scrutinyDetail.setKey(key);
 		return scrutinyDetail;
+	}
+
+	protected OccupancyTypeHelper getMostRestrictiveFar(Set<OccupancyTypeHelper> distinctOccupancyTypes) {
+		Set<String> codes = new HashSet<>();
+		Map<String, OccupancyTypeHelper> codesMap = new HashMap<>();
+		for (OccupancyTypeHelper typeHelper : distinctOccupancyTypes) {
+
+			if (typeHelper.getType() != null)
+				codesMap.put(typeHelper.getType().getCode(), typeHelper);
+			if (typeHelper.getSubtype() != null)
+				codesMap.put(typeHelper.getSubtype().getCode(), typeHelper);
+		}
+		codes = codesMap.keySet();
+		if (codes.contains(T1c))
+			return codesMap.get(T1c);
+		if (codes.contains(T1b))
+			return codesMap.get(T1b);
+		if (codes.contains(T1a))
+			return codesMap.get(T1a);
+		if (codes.contains(T))
+			return codesMap.get(T);
+		if (codes.contains(P3c))
+			return codesMap.get(P3c);
+		if (codes.contains(P3b))
+			return codesMap.get(P3b);
+		if (codes.contains(P3a))
+			return codesMap.get(P3a);
+		if (codes.contains(P2d))
+			return codesMap.get(P2d);
+		if (codes.contains(P2c))
+			return codesMap.get(P2c);
+		if (codes.contains(P2b))
+			return codesMap.get(P2b);
+		if (codes.contains(P2a))
+			return codesMap.get(P2a);
+		if (codes.contains(P1g))
+			return codesMap.get(P1g);
+		if (codes.contains(P1f))
+			return codesMap.get(P1f);
+		if (codes.contains(P1e))
+			return codesMap.get(P1e);
+		if (codes.contains(P1d))
+			return codesMap.get(P1d);
+		if (codes.contains(P1c))
+			return codesMap.get(P1c);
+		if (codes.contains(P1b))
+			return codesMap.get(P1b);
+		if (codes.contains(P1a))
+			return codesMap.get(P1a);
+		if (codes.contains(P))
+			return codesMap.get(P);
+		if (codes.contains(G3c))
+			return codesMap.get(G3c);
+		if (codes.contains(G3b))
+			return codesMap.get(G3b);
+		if (codes.contains(G3a))
+			return codesMap.get(G3a);
+		if (codes.contains(G2a))
+			return codesMap.get(G2a);
+		if (codes.contains(G1a))
+			return codesMap.get(G1a);
+		if (codes.contains(G))
+			return codesMap.get(G);
+		if (codes.contains(I1b))
+			return codesMap.get(I1b);
+		if (codes.contains(I1a))
+			return codesMap.get(I1a);
+		if (codes.contains(I))
+			return codesMap.get(I);
+		if (codes.contains(C6a))
+			return codesMap.get(C6a);
+		if (codes.contains(C5a))
+			return codesMap.get(C5a);
+		if (codes.contains(C4a))
+			return codesMap.get(C4a);
+		if (codes.contains(C3a))
+			return codesMap.get(C3a);
+		if (codes.contains(C2a))
+			return codesMap.get(C2a);
+		if (codes.contains(C1c))
+			return codesMap.get(C1c);
+		if (codes.contains(C1b))
+			return codesMap.get(C1b);
+		if (codes.contains(C1a))
+			return codesMap.get(C1a);
+		if (codes.contains(C))
+			return codesMap.get(C);
+		if (codes.contains(R2a))
+			return codesMap.get(R2a);
+		if (codes.contains(R1c))
+			return codesMap.get(R1c);
+		if (codes.contains(R1b))
+			return codesMap.get(R1b);
+		if (codes.contains(R1a))
+			return codesMap.get(R1a);
+		if (codes.contains(R))
+			return codesMap.get(R);
+		else
+			return null;
+
 	}
 
 	@Override

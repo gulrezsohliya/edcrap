@@ -1,41 +1,14 @@
 package org.egov.client.edcr;
 
-import static org.egov.client.constants.DxfFileConstants_AR.A_RH;
-import static org.egov.edcr.constants.DxfFileConstants.A;
-import static org.egov.edcr.constants.DxfFileConstants.A2;
-import static org.egov.edcr.constants.DxfFileConstants.A_FH;
-import static org.egov.edcr.constants.DxfFileConstants.A_SA;
-import static org.egov.edcr.constants.DxfFileConstants.D_A;
-import static org.egov.edcr.constants.DxfFileConstants.D_B;
-import static org.egov.edcr.constants.DxfFileConstants.D_C;
-import static org.egov.edcr.constants.DxfFileConstants.E_CLG;
-import static org.egov.edcr.constants.DxfFileConstants.E_EARC;
-import static org.egov.edcr.constants.DxfFileConstants.E_NS;
-import static org.egov.edcr.constants.DxfFileConstants.E_PS;
-import static org.egov.edcr.constants.DxfFileConstants.E_SACA;
-import static org.egov.edcr.constants.DxfFileConstants.E_SFDAP;
-import static org.egov.edcr.constants.DxfFileConstants.E_SFMC;
-import static org.egov.edcr.constants.DxfFileConstants.F;
-import static org.egov.edcr.constants.DxfFileConstants.H_PP;
-import static org.egov.edcr.constants.DxfFileConstants.M_DFPAB;
-import static org.egov.edcr.constants.DxfFileConstants.M_HOTHC;
-import static org.egov.edcr.constants.DxfFileConstants.M_NAPI;
-import static org.egov.edcr.constants.DxfFileConstants.M_OHF;
-import static org.egov.edcr.constants.DxfFileConstants.M_VH;
-import static org.egov.edcr.constants.DxfFileConstants.S_BH;
-import static org.egov.edcr.constants.DxfFileConstants.S_CA;
-import static org.egov.edcr.constants.DxfFileConstants.S_CRC;
-import static org.egov.edcr.constants.DxfFileConstants.S_ECFG;
-import static org.egov.edcr.constants.DxfFileConstants.S_ICC;
-import static org.egov.edcr.constants.DxfFileConstants.S_MCH;
-import static org.egov.edcr.constants.DxfFileConstants.S_SAS;
-import static org.egov.edcr.constants.DxfFileConstants.S_SC;
+import static org.egov.client.constants.DxfFileConstants_AR.*;
+
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.egov.client.constants.DxfFileConstants_AR;
 import org.egov.common.entity.edcr.OccupancyTypeHelper;
 import org.egov.common.entity.edcr.Plan;
 
@@ -55,68 +28,93 @@ public class Util_AR {
 				codesMap.put(typeHelper.getSubtype().getCode(), typeHelper);
 		}
 		codes = codesMap.keySet();
-		if (codes.contains(S_ECFG))
-			return codesMap.get(S_ECFG);
-		else if (codes.contains(A_FH))
-			return codesMap.get(A_FH);
-		else if (codes.contains(S_SAS))
-			return codesMap.get(S_SAS);
-		else if (codes.contains(D_B))
-			return codesMap.get(D_B);
-		else if (codes.contains(D_C))
-			return codesMap.get(D_C);
-		else if (codes.contains(D_A))
-			return codesMap.get(D_A);
-		else if (codes.contains(H_PP))
-			return codesMap.get(H_PP);
-		else if (codes.contains(E_NS))
-			return codesMap.get(E_NS);
-		else if (codes.contains(M_DFPAB))
-			return codesMap.get(M_DFPAB);
-		else if (codes.contains(E_PS))
-			return codesMap.get(E_PS);
-		else if (codes.contains(E_SFMC))
-			return codesMap.get(E_SFMC);
-		else if (codes.contains(E_SFDAP))
-			return codesMap.get(E_SFDAP);
-		else if (codes.contains(E_EARC))
-			return codesMap.get(E_EARC);
-		else if (codes.contains(S_MCH))
-			return codesMap.get(S_MCH);
-		else if (codes.contains(S_BH))
-			return codesMap.get(S_BH);
-		else if (codes.contains(S_CRC))
-			return codesMap.get(S_CRC);
-		else if (codes.contains(S_CA))
-			return codesMap.get(S_CA);
-		else if (codes.contains(S_SC))
-			return codesMap.get(S_SC);
-		else if (codes.contains(S_ICC))
-			return codesMap.get(S_ICC);
-		else if (codes.contains(A2))
-			return codesMap.get(A2);
-		else if (codes.contains(E_CLG))
-			return codesMap.get(E_CLG);
-		else if (codes.contains(M_OHF))
-			return codesMap.get(M_OHF);
-		else if (codes.contains(M_VH))
-			return codesMap.get(M_VH);
-		else if (codes.contains(M_NAPI))
-			return codesMap.get(M_NAPI);
-		else if (codes.contains(A_SA))
-			return codesMap.get(A_SA);
-		else if (codes.contains(M_HOTHC))
-			return codesMap.get(M_HOTHC);
-		else if (codes.contains(E_SACA))
-			return codesMap.get(E_SACA);
-		else if (codes.contains(F))
-			return codesMap.get(F);
-		else if (codes.contains(A))
-			return codesMap.get(A);
-		else if (codes.contains(A_RH))
-			return codesMap.get(A_RH);
+		if (codes.contains(DxfFileConstants_AR.T1c))
+			return codesMap.get(DxfFileConstants_AR.T1c);
+		if (codes.contains(DxfFileConstants_AR.T1b))
+			return codesMap.get(DxfFileConstants_AR.T1b);
+		if (codes.contains(DxfFileConstants_AR.T1a))
+			return codesMap.get(DxfFileConstants_AR.T1a);
+		if (codes.contains(DxfFileConstants_AR.T))
+			return codesMap.get(DxfFileConstants_AR.T);
+		if (codes.contains(DxfFileConstants_AR.P3c))
+			return codesMap.get(DxfFileConstants_AR.P3c);
+		if (codes.contains(DxfFileConstants_AR.P3b))
+			return codesMap.get(DxfFileConstants_AR.P3b);
+		if (codes.contains(DxfFileConstants_AR.P3a))
+			return codesMap.get(DxfFileConstants_AR.P3a);
+		if (codes.contains(DxfFileConstants_AR.P2d))
+			return codesMap.get(DxfFileConstants_AR.P2d);
+		if (codes.contains(DxfFileConstants_AR.P2c))
+			return codesMap.get(DxfFileConstants_AR.P2c);
+		if (codes.contains(DxfFileConstants_AR.P2b))
+			return codesMap.get(DxfFileConstants_AR.P2b);
+		if (codes.contains(DxfFileConstants_AR.P2a))
+			return codesMap.get(DxfFileConstants_AR.P2a);
+		if (codes.contains(DxfFileConstants_AR.P1g))
+			return codesMap.get(DxfFileConstants_AR.P1g);
+		if (codes.contains(DxfFileConstants_AR.P1f))
+			return codesMap.get(DxfFileConstants_AR.P1f);
+		if (codes.contains(DxfFileConstants_AR.P1e))
+			return codesMap.get(DxfFileConstants_AR.P1e);
+		if (codes.contains(DxfFileConstants_AR.P1d))
+			return codesMap.get(DxfFileConstants_AR.P1d);
+		if (codes.contains(DxfFileConstants_AR.P1c))
+			return codesMap.get(DxfFileConstants_AR.P1c);
+		if (codes.contains(DxfFileConstants_AR.P1b))
+			return codesMap.get(DxfFileConstants_AR.P1b);
+		if (codes.contains(DxfFileConstants_AR.P1a))
+			return codesMap.get(DxfFileConstants_AR.P1a);
+		if (codes.contains(DxfFileConstants_AR.P))
+			return codesMap.get(DxfFileConstants_AR.P);
+		if (codes.contains(DxfFileConstants_AR.G3c))
+			return codesMap.get(DxfFileConstants_AR.G3c);
+		if (codes.contains(DxfFileConstants_AR.G3b))
+			return codesMap.get(DxfFileConstants_AR.G3b);
+		if (codes.contains(DxfFileConstants_AR.G3a))
+			return codesMap.get(DxfFileConstants_AR.G3a);
+		if (codes.contains(DxfFileConstants_AR.G2a))
+			return codesMap.get(DxfFileConstants_AR.G2a);
+		if (codes.contains(DxfFileConstants_AR.G1a))
+			return codesMap.get(DxfFileConstants_AR.G1a);
+		if (codes.contains(DxfFileConstants_AR.G))
+			return codesMap.get(DxfFileConstants_AR.G);
+		if (codes.contains(DxfFileConstants_AR.I1b))
+			return codesMap.get(DxfFileConstants_AR.I1b);
+		if (codes.contains(DxfFileConstants_AR.I1a))
+			return codesMap.get(DxfFileConstants_AR.I1a);
+		if (codes.contains(DxfFileConstants_AR.I))
+			return codesMap.get(DxfFileConstants_AR.I);
+		if (codes.contains(DxfFileConstants_AR.C6a))
+			return codesMap.get(DxfFileConstants_AR.C6a);
+		if (codes.contains(DxfFileConstants_AR.C5a))
+			return codesMap.get(DxfFileConstants_AR.C5a);
+		if (codes.contains(DxfFileConstants_AR.C4a))
+			return codesMap.get(DxfFileConstants_AR.C4a);
+		if (codes.contains(DxfFileConstants_AR.C3a))
+			return codesMap.get(DxfFileConstants_AR.C3a);
+		if (codes.contains(DxfFileConstants_AR.C2a))
+			return codesMap.get(DxfFileConstants_AR.C2a);
+		if (codes.contains(DxfFileConstants_AR.C1c))
+			return codesMap.get(DxfFileConstants_AR.C1c);
+		if (codes.contains(DxfFileConstants_AR.C1b))
+			return codesMap.get(DxfFileConstants_AR.C1b);
+		if (codes.contains(DxfFileConstants_AR.C1a))
+			return codesMap.get(DxfFileConstants_AR.C1a);
+		if (codes.contains(DxfFileConstants_AR.C))
+			return codesMap.get(DxfFileConstants_AR.C);
+		if (codes.contains(DxfFileConstants_AR.R2a))
+			return codesMap.get(DxfFileConstants_AR.R2a);
+		if (codes.contains(DxfFileConstants_AR.R1c))
+			return codesMap.get(DxfFileConstants_AR.R1c);
+		if (codes.contains(DxfFileConstants_AR.R1b))
+			return codesMap.get(DxfFileConstants_AR.R1b);
+		if (codes.contains(DxfFileConstants_AR.R1a))
+			return codesMap.get(DxfFileConstants_AR.R1a);
+		if (codes.contains(DxfFileConstants_AR.R))
+			return codesMap.get(DxfFileConstants_AR.R);
 		else
 			return null;
+	
 
 	}
 
